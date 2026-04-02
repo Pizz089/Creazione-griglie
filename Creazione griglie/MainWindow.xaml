@@ -34,7 +34,7 @@
                 <Button Click="BtnGestioneStili_Click" Style="{StaticResource TopMenuButtonStyle}" Margin="4,0,0,0">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="🎨" Margin="0,0,8,0" FontSize="14" VerticalAlignment="Center"/>
-                        <TextBlock Text="Gestione Stili" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        <TextBlock Text="Stili Predefiniti" VerticalAlignment="Center" FontWeight="SemiBold"/>
                     </StackPanel>
                 </Button>
 
@@ -141,24 +141,94 @@
             <GridSplitter Grid.Column="1" Style="{StaticResource ModernGridSplitterStyle}" Margin="0,0,0,10" VerticalAlignment="Stretch" HorizontalAlignment="Center"/>
 
             <Border Grid.Column="2" Background="{DynamicResource BgFinestra}" Margin="4,0,4,10" CornerRadius="8" Effect="{StaticResource OmbraCard}">
-                <helix:HelixViewport3D x:Name="viewPort" 
-                                       ZoomExtentsWhenLoaded="True" 
-                                       ShowCoordinateSystem="True" 
-                                       CoordinateSystemLabelForeground="White"
-                                       MouseLeftButtonDown="ViewPort_MouseLeftButtonDown">
+                <Grid>
 
-                    <ModelVisual3D x:Name="luciContainer">
-                        <ModelVisual3D.Content>
-                            <Model3DGroup x:Name="luciGroup" />
-                        </ModelVisual3D.Content>
-                    </ModelVisual3D>
+                    <ScrollViewer x:Name="pannelloGalleria" VerticalScrollBarVisibility="Auto" Visibility="Visible">
+                        <ItemsControl x:Name="listaGruppiGalleria">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="10,15,10,15">
 
-                    <ModelVisual3D x:Name="visualContainer">
-                        <ModelVisual3D.Content>
-                            <Model3DGroup x:Name="modelGroup" />
-                        </ModelVisual3D.Content>
-                    </ModelVisual3D>
-                </helix:HelixViewport3D>
+                                        <Border Background="{DynamicResource ColorePrimario}" HorizontalAlignment="Left" Padding="15,6" CornerRadius="6" Margin="10,0,0,10">
+                                            <TextBlock Text="{Binding NomeGruppo}" FontWeight="Bold" FontSize="16" Foreground="White"/>
+                                        </Border>
+
+                                        <ItemsControl ItemsSource="{Binding Elementi}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel Orientation="Horizontal"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Width="280" Height="280" Margin="10" Background="{DynamicResource BgCard}" CornerRadius="8" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1">
+                                                        <Grid>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="Auto"/>
+                                                                <RowDefinition Height="*"/>
+                                                            </Grid.RowDefinitions>
+
+                                                            <Border Background="{DynamicResource ColoreBordoCard}" CornerRadius="8,8,0,0" Padding="8">
+                                                                <TextBlock Text="{Binding Titolo}" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center"/>
+                                                            </Border>
+
+                                                            <helix:HelixViewport3D Grid.Row="1" ZoomExtentsWhenLoaded="True" ShowCoordinateSystem="False" ShowViewCube="False" IsHitTestVisible="False">
+                                                                <helix:HelixViewport3D.Camera>
+                                                                    <PerspectiveCamera Position="0,0,100" LookDirection="0,0,-100" UpDirection="0,1,0"/>
+                                                                </helix:HelixViewport3D.Camera>
+                                                                <ModelVisual3D>
+                                                                    <ModelVisual3D.Content>
+                                                                        <AmbientLight Color="White" />
+                                                                    </ModelVisual3D.Content>
+                                                                </ModelVisual3D>
+                                                                <ModelVisual3D Content="{Binding Modello}" />
+                                                            </helix:HelixViewport3D>
+
+                                                            <Grid Grid.Row="1" Background="Transparent" x:Name="hoverGrid">
+                                                                <Button Content="🔍 Ingrandisci" x:Name="btnIngrandisci" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="15,10" Click="BtnIngrandisci_Click" Tag="{Binding}" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource ColorePrimario}" Foreground="White" FontWeight="Bold" Opacity="0" Visibility="Hidden"/>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Border>
+                                                    <DataTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="btnIngrandisci" Property="Opacity" Value="1"/>
+                                                            <Setter TargetName="btnIngrandisci" Property="Visibility" Value="Visible"/>
+                                                            <Setter TargetName="hoverGrid" Property="Background" Value="#60000000"/>
+                                                        </Trigger>
+                                                    </DataTemplate.Triggers>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <Grid x:Name="pannelloMassimizzato" Visibility="Collapsed">
+                        <helix:HelixViewport3D x:Name="viewPortMassimizzato" 
+                                               ZoomExtentsWhenLoaded="True" 
+                                               ShowCoordinateSystem="True" 
+                                               CoordinateSystemLabelForeground="White"
+                                               MouseLeftButtonDown="ViewPort_MouseLeftButtonDown">
+
+                            <ModelVisual3D x:Name="luciContainer">
+                                <ModelVisual3D.Content>
+                                    <Model3DGroup x:Name="luciGroup" />
+                                </ModelVisual3D.Content>
+                            </ModelVisual3D>
+
+                            <ModelVisual3D x:Name="visualContainer">
+                                <ModelVisual3D.Content>
+                                    <Model3DGroup x:Name="modelGroupMassimizzato" />
+                                </ModelVisual3D.Content>
+                            </ModelVisual3D>
+                        </helix:HelixViewport3D>
+
+                        <Button Content="⬅ Torna alla Galleria" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15" Padding="15,8" Click="BtnTornaGalleria_Click" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgCard}" Foreground="White"/>
+                    </Grid>
+
+                </Grid>
             </Border>
 
             <GridSplitter Grid.Column="3" Style="{StaticResource ModernGridSplitterStyle}" Margin="0,0,0,10" VerticalAlignment="Stretch" HorizontalAlignment="Center"/>
@@ -170,23 +240,23 @@
 
                     <CheckBox x:Name="chkApplicaATutti" Content="Applica a tutti gli oggetti con lo stesso aspetto" Style="{StaticResource ModernToggleStyle}" Margin="0,5,0,15" IsChecked="True" FontSize="14"/>
 
-                    <TextBlock Text="Colore Avanzato" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                    <TextBlock Text="Colore" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold"/>
                     <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8" Margin="0,0,0,20">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="2*"/>
                             </Grid.ColumnDefinitions>
                             <Border x:Name="rectColore" Background="White" CornerRadius="4" Margin="0,0,10,0" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" MouseLeftButtonDown="RectColore_Click"/>
                             <Button Content="Modifica" Grid.Column="1" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="10,5" Click="RectColore_Click"/>
                         </Grid>
                     </Border>
 
-                    <TextBlock Text="Immagine Skin (Texture)" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                    <TextBlock Text="Immagine Texture" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold"/>
                     <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8">
                         <StackPanel>
                             <TextBlock x:Name="txtTexturePath" Text="Nessuna" Foreground="{DynamicResource TestoPrincipale}" TextWrapping="Wrap" Margin="0,0,0,10"/>
-                            <Grid Margin="0,0,0,15">
+                            <Grid Margin="0,0,0,25">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
@@ -196,7 +266,7 @@
                             </Grid>
 
                             <TextBlock Text="Zoom Skin (Scala UV)" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold" FontSize="11"/>
-                            <Grid Margin="0,0,0,10">
+                            <Grid Margin="0,0,0,25">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="45"/>
@@ -205,11 +275,9 @@
                                 <TextBox x:Name="txtZoomSkin" Text="1.00" Style="{StaticResource ModernInputStyle}" Grid.Column="1" TextChanged="TxtZoomSkin_TextChanged"/>
                             </Grid>
 
-                            <Button x:Name="btnAutoFit" Content="Adatta Automaticamente" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource ColoreSecondario}" Foreground="White" Padding="10,5" Margin="0,0,0,15" Click="BtnAutoFitSkin_Click"/>
+                            <Button x:Name="btnAutoFit" Content="Adatta l'immagine" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource ColoreSecondario}" Foreground="White" Padding="15,10,15,10" Margin="0,0,0,15" Click="BtnAutoFitSkin_Click" UseLayoutRounding="False"/>
                         </StackPanel>
                     </Border>
-
-                    <Button x:Name="btnModificaFisica" Content="Modifica Dimensioni Fisiche" Style="{StaticResource BaseCardButtonStyle}" Click="BtnModificaFisica_Click" Margin="0,10,0,0" Height="30" FontWeight="Bold" Background="{DynamicResource ColoreSelezione}" Foreground="{DynamicResource TestoPrincipale}" BorderBrush="{x:Null}"/>
 
                     <TextBlock x:Name="txtStatus" Margin="0,30" TextWrapping="Wrap" Foreground="{DynamicResource ColoreIngressi}" FontWeight="SemiBold" TextAlignment="Center"/>
                 </StackPanel>
