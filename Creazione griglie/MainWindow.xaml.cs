@@ -70,10 +70,9 @@ namespace DirectXEditor
             try
             {
                 // Percorsi dei desktop (utente e pubblico)
-                var desktopPaths = new[] {
-            Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory)
-        };
+                var desktopPaths = new[] { Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+                                           Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory)
+                                         };
 
                 foreach (var desktop in desktopPaths)
                 {
@@ -84,26 +83,20 @@ namespace DirectXEditor
 
                     if (files.Length > 0)
                     {
-                        // Estraggo il percorso completo del file a cui punta il collegamento (es. C:\...\Vision\Focus.exe)
-                        string targetPath = OttieniDestinazioneCollegamento(files[0]);
+                        // Estraggo il percorso completo del file a cui punta il collegamento (es. C:\...\Vision\Focus.exe)P
+                        string targetPath = @"\\10.11.1.1\c$\Program Files (x86)\Steltronic\Vision\MediaNova\MeshBase\Styles";
 
-                        if (!string.IsNullOrEmpty(targetPath) && File.Exists(targetPath))
+                        if (!string.IsNullOrEmpty(targetPath))
                         {
-                            // Isolo la cartella contenitrice (es. C:\...\Vision)
-                            string cartellaOrigineFocus = Path.GetDirectoryName(targetPath);
-
-                            // Ricostruisco il percorso verso la cartella Styles
-                            string pathStiliDinamico = Path.Combine(cartellaOrigineFocus, "MediaNova", "MeshBase", "Styles");
-
-                            if (Directory.Exists(pathStiliDinamico))
+                            if (Directory.Exists(targetPath))
                             {
-                                return pathStiliDinamico;
+                                return targetPath;
                             }
                         }
                     }
                 }
             }
-    catch { }
+            catch { }
 
             // Se arrivo qui, significa che il collegamento non c'è o non è valido, quindi tento la via fissa
             if (Directory.Exists(fallbackPath))
