@@ -1,0 +1,34 @@
+﻿<Window x:Class="DirectXEditor.StyleSelectorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Seleziona Stile" Width="550" Height="700"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{DynamicResource BgCard}" Foreground="{DynamicResource TestoPrincipale}">
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Stili Disponibili:" FontWeight="Bold" FontSize="20" Margin="0,0,0,15" Foreground="White" HorizontalAlignment="Center" />
+
+        <Border Grid.Row="1" Margin="0,16,0,16"
+              Background="{DynamicResource BgFinestra}"
+              CornerRadius="6" Effect="{StaticResource OmbraCard}">
+
+            <ListBox x:Name="lbStili" Foreground="White" 
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     MouseDoubleClick="LbStili_MouseDoubleClick" 
+                     Background="{x:Null}" BorderBrush="{x:Null}"/>
+        </Border>
+
+        <Button Grid.Row="2" x:Name="btnOk" Content="Carica Stile Selezionato" 
+                Margin="0,15,0,0" Padding="12" 
+                Background="#FF1E88E5" Foreground="White" 
+                FontSize="16" FontWeight="Bold" Cursor="Hand"
+                Style="{StaticResource BaseCardButtonStyle}" 
+                Click="BtnOk_Click" />
+    </Grid>
+</Window>
