@@ -40,6 +40,13 @@
 
                 <Border Width="1" Background="{DynamicResource ColoreBordoCard}" Margin="15,4" CornerRadius="1"/>
 
+                <Button x:Name="btnUndo" Click="BtnUndo_Click" Style="{StaticResource TopMenuButtonStyle}" Margin="0,0,4,0" IsEnabled="False">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="↩️" Margin="0,0,8,0" FontSize="14" VerticalAlignment="Center"/>
+                        <TextBlock Text="Annulla" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Button>
+
                 <Button Click="BtnHome_Click" Style="{StaticResource TopMenuButtonStyle}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="🏠" Margin="0,0,8,0" FontSize="14" VerticalAlignment="Center"/>
@@ -234,53 +241,63 @@
             <GridSplitter Grid.Column="3" Style="{StaticResource ModernGridSplitterStyle}" Margin="0,0,0,10" VerticalAlignment="Stretch" HorizontalAlignment="Center"/>
 
             <Border Grid.Column="4" Background="{DynamicResource BgCard}" Margin="4,0,10,10" CornerRadius="8" Effect="{StaticResource OmbraCard}">
-                <StackPanel x:Name="pannelloProprieta" Margin="15" IsEnabled="False">
-                    <TextBlock Text="Proprietà Oggetto" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TestoPrincipale}" Margin="0,0,0,5" TextAlignment="Center"/>
-                    <TextBlock x:Name="txtNomeSelezionato" Text="Nessuna selezione" Foreground="{DynamicResource ColorePrimario}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,20" TextAlignment="Center"/>
-
-                    <CheckBox x:Name="chkApplicaATutti" Content="Applica a tutti gli oggetti con lo stesso aspetto" Style="{StaticResource ModernToggleStyle}" Margin="0,5,0,15" IsChecked="True" FontSize="14"/>
-
-                    <TextBlock Text="Colore" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold"/>
-                    <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8" Margin="0,0,0,20">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="2*"/>
-                            </Grid.ColumnDefinitions>
-                            <Border x:Name="rectColore" Background="White" CornerRadius="4" Margin="0,0,10,0" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" MouseLeftButtonDown="RectColore_Click"/>
-                            <Button Content="Modifica" Grid.Column="1" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="10,5" Click="RectColore_Click"/>
-                        </Grid>
-                    </Border>
-
-                    <TextBlock Text="Immagine Texture" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold"/>
-                    <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8">
-                        <StackPanel>
-                            <TextBlock x:Name="txtTexturePath" Text="Nessuna" Foreground="{DynamicResource TestoPrincipale}" TextWrapping="Wrap" Margin="0,0,0,10"/>
-                            <Grid Margin="0,0,0,25">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Button Content="Sfoglia..." Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="10,8" Margin="0,0,5,0" Click="BtnSkin_Click"/>
-                                <Button Content="Rimuovi" Grid.Column="1" Style="{StaticResource BaseCardButtonStyle}" Background="#FFD32F2F" Foreground="White" Padding="10,8" Margin="5,0,0,0" Click="BtnRemoveSkin_Click"/>
-                            </Grid>
-
-                            <TextBlock Text="Zoom Skin (Scala UV)" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold" FontSize="11"/>
-                            <Grid Margin="0,0,0,25">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="45"/>
-                                </Grid.ColumnDefinitions>
-                                <Slider x:Name="slZoomSkin" Style="{StaticResource ModernSliderStyle}" Minimum="0.01" Maximum="30" Value="1" TickFrequency="0.1" ValueChanged="SlZoomSkin_ValueChanged" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                <TextBox x:Name="txtZoomSkin" Text="1.00" Style="{StaticResource ModernInputStyle}" Grid.Column="1" TextChanged="TxtZoomSkin_TextChanged"/>
-                            </Grid>
-
-                            <Button x:Name="btnAutoFit" Content="Adatta l'immagine" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource ColoreSecondario}" Foreground="White" Padding="15,10,15,10" Margin="0,0,0,15" Click="BtnAutoFitSkin_Click" UseLayoutRounding="False"/>
+                <DockPanel>
+                    <Border DockPanel.Dock="Bottom" Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="5" Margin="15,0,15,15">
+                        <StackPanel x:Name="pannelloSfondo" Margin="10">
+                            <TextBlock Text="Sfondo Visualizzatore (Stile)" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,8" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                            <Button x:Name="btnSfondoColore" Content="🎨 Cambia Colore di Sfondo" Margin="0" Style="{StaticResource BaseCardButtonStyle}" Click="BtnSfondoColore_Click" Foreground="{DynamicResource TestoPrincipale}" Background="{DynamicResource BgPulsante}" Padding="10"/>
                         </StackPanel>
                     </Border>
 
-                    <TextBlock x:Name="txtStatus" Margin="0,30" TextWrapping="Wrap" Foreground="{DynamicResource ColoreIngressi}" FontWeight="SemiBold" TextAlignment="Center"/>
-                </StackPanel>
+                    <StackPanel x:Name="pannelloProprieta" Margin="15,15,15,0" IsEnabled="False">
+                        <TextBlock Text="Proprietà Oggetto" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TestoPrincipale}" Margin="0,0,0,5" TextAlignment="Center"/>
+                        <TextBlock x:Name="txtNomeSelezionato" Text="Nessuna selezione" Foreground="{DynamicResource ColorePrimario}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,20" TextAlignment="Center"/>
+
+                        <CheckBox x:Name="chkApplicaATutti" Content="Applica a tutti gli oggetti simili" Style="{StaticResource ModernToggleStyle}" Margin="0,5,0,15" IsChecked="True" FontSize="14"/>
+
+                        <TextBlock Text="Colore" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                        <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8" Margin="0,0,0,20">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="rectColore" Background="White" CornerRadius="4" Margin="0,0,10,0" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" MouseLeftButtonDown="RectColore_Click"/>
+                                <Button Content="Modifica" Grid.Column="1" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="10,5" Click="RectColore_Click"/>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="Immagine Texture" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                        <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8">
+                            <StackPanel>
+                                <TextBlock x:Name="txtTexturePath" Text="Nessuna" Foreground="{DynamicResource TestoPrincipale}" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                                <Grid Margin="0,0,0,25">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Content="Sfoglia..." Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="10,8" Margin="0,0,5,0" Click="BtnSkin_Click"/>
+                                    <Button Content="Rimuovi" Grid.Column="1" Style="{StaticResource BaseCardButtonStyle}" Background="#FFD32F2F" Foreground="White" Padding="10,8" Margin="5,0,0,0" Click="BtnRemoveSkin_Click"/>
+                                </Grid>
+
+                                <TextBlock Text="Zoom Skin (Scala UV)" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold" FontSize="11"/>
+
+                                <Grid Margin="0,0,0,25" PreviewMouseDown="Zoom_PreviewMouseDown">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="45"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Slider x:Name="slZoomSkin" Style="{StaticResource ModernSliderStyle}" Minimum="0.01" Maximum="30" Value="1" TickFrequency="0.1" ValueChanged="SlZoomSkin_ValueChanged" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBox x:Name="txtZoomSkin" Text="1.00" Style="{StaticResource ModernInputStyle}" Grid.Column="1" TextChanged="TxtZoomSkin_TextChanged"/>
+                                </Grid>
+
+                                <Button x:Name="btnAutoFit" Content="Adatta l'immagine" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource ColoreSecondario}" Foreground="White" Padding="15,10" Click="BtnAutoFitSkin_Click" UseLayoutRounding="False"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock x:Name="txtStatus" Margin="0,20" TextWrapping="Wrap" Foreground="{DynamicResource ColoreIngressi}" FontWeight="SemiBold" TextAlignment="Center"/>
+                    </StackPanel>
+                </DockPanel>
             </Border>
         </Grid>
     </DockPanel>

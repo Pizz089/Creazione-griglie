@@ -24,11 +24,25 @@
                      Background="{x:Null}" BorderBrush="{x:Null}"/>
         </Border>
 
-        <Button Grid.Row="2" x:Name="btnOk" Content="Carica Stile Selezionato" 
-                Margin="0,15,0,0" Padding="12" 
-                Background="#FF1E88E5" Foreground="White" 
-                FontSize="16" FontWeight="Bold" Cursor="Hand"
-                Style="{StaticResource BaseCardButtonStyle}" 
-                Click="BtnOk_Click" />
+        <Grid Grid.Row="2" Margin="0,15,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button x:Name="btnElimina" Grid.Column="0" Content="🗑 Elimina Stile" 
+                    Margin="0,0,5,0" Padding="12" 
+                    Background="#FFD32F2F" Foreground="White" 
+                    FontSize="16" FontWeight="Bold" Cursor="Hand"
+                    Style="{StaticResource BaseCardButtonStyle}" 
+                    Click="BtnElimina_Click" />
+
+            <Button Grid.Column="1" x:Name="btnOk" Content="Carica Stile" 
+                    Margin="5,0,0,0" Padding="12" 
+                    Background="#FF1E88E5" Foreground="White" 
+                    FontSize="16" FontWeight="Bold" Cursor="Hand"
+                    Style="{StaticResource BaseCardButtonStyle}" 
+                    Click="BtnOk_Click" />
+        </Grid>
     </Grid>
 </Window>

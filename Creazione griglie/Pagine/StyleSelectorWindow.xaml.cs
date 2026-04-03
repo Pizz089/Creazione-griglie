@@ -14,21 +14,29 @@ namespace DirectXEditor
         // Espongo il nome dello stile selezionato
         public string SelectedStyleName { get; private set; }
 
+        // Mantengo in memoria la radice in modo da poter ricaricare la lista dopo l'eliminazione
+        private string _baseStylesPath;
+
         public StyleSelectorWindow(string baseStylesPath)
         {
-            // Inizializzo l'interfaccia XAML
             InitializeComponent();
+            _baseStylesPath = baseStylesPath;
 
             // Popolo la lista appena la finestra viene creata
-            CaricaListaStili(baseStylesPath);
+            CaricaListaStili(_baseStylesPath);
         }
 
         private void CaricaListaStili(string baseStylesPath)
         {
-            // Filtro e ordino le cartelle in modo intelligente
+            lbStili.Items.Clear();
+
+            // Filtro e ordino le cartelle:
+            // 1. Prendo tutte le cartelle "style#*"
+            // 2. FILTRO via i file L1, L2, L3 tramite IsStyleLoadable
+            // 3. Le ordino per numero
             string[] dirs = Directory.GetDirectories(baseStylesPath, "style#*");
             var stiliOrdinati = dirs.Select(d => Path.GetFileName(d))
-                                    .Where(IsStyleLoadable)
+                                    .Where(IsStyleLoadable) // <- FILTRO RIPRISTINATO
                                     .OrderBy(name => EstraiNumeroStile(name))
                                     .ToList();
 
@@ -95,18 +103,41 @@ namespace DirectXEditor
                     Cursor = Cursors.Hand
                 };
 
-                // Aggiungo l'elemento alla ListBox definita nello XAML
+                // Aggiungo l'elemento alla ListBox
                 lbStili.Items.Add(lbi);
             }
         }
 
-        // Gestisco il click sul bottone
+        // --- FUNZIONI DI CONTROLLO E ORDINAMENTO ---
+
+        // Nascondo dalla visualizzazione gli stili "L"
+        private bool IsStyleLoadable(string folderName)
+        {
+            string name = folderName.ToLower();
+            if (name == "style#l1" || name == "style#l2" || name == "style#l3") return false;
+
+            return true;
+        }
+
+        private int EstraiNumeroStile(string folderName)
+        {
+            string name = folderName.ToLower().Replace("style#", "");
+            if (int.TryParse(name, out int num)) return num;
+
+            // Se per caso qualcosa sfugge, li metto in fondo alla lista
+            if (name == "l1") return 10000;
+            if (name == "l2") return 10001;
+            if (name == "l3") return 10002;
+            return 99999;
+        }
+
+        // --- EVENTI INTERFACCIA ---
+
         private void BtnOk_Click(object sender, RoutedEventArgs e)
         {
             ConfermaSelezione();
         }
 
-        // Gestisco il doppio clic sulla riga
         private void LbStili_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ConfermaSelezione();
@@ -126,22 +157,45 @@ namespace DirectXEditor
             }
         }
 
-        private bool IsStyleLoadable(string folderName)
+        // Elimino lo stile verificando prima i permessi
+        private void BtnElimina_Click(object sender, RoutedEventArgs e)
         {
-            string name = folderName.ToLower();
-            if (name == "style#l1" || name == "style#l2" || name == "style#l3") return false;
-            return true;
-        }
+            if (lbStili.SelectedItem != null)
+            {
+                string stileSelezionato = ((ListBoxItem)lbStili.SelectedItem).Tag.ToString();
 
-        private int EstraiNumeroStile(string folderName)
-        {
-            string name = folderName.ToLower().Replace("style#", "");
-            if (int.TryParse(name, out int num)) return num;
+                // Blocco l'eliminazione se è un tema di sistema usando la nostra classe dedicata
+                if (StyleEnvironment.IsStyleProtected(stileSelezionato))
+                {
+                    MessageBox.Show($"Lo stile '{stileSelezionato}' è protetto dal sistema e non può essere eliminato.", "Operazione Negata", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
 
-            if (name == "l1") return 10000;
-            if (name == "l2") return 10001;
-            if (name == "l3") return 10002;
-            return 99999;
+                MessageBoxResult result = MessageBox.Show($"Sei sicuro di voler eliminare definitivamente lo stile '{stileSelezionato}'?\n\nQuesta operazione non è reversibile.", "Conferma Eliminazione", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        string cartellaDaEliminare = Path.Combine(_baseStylesPath, stileSelezionato);
+                        if (Directory.Exists(cartellaDaEliminare))
+                        {
+                            Directory.Delete(cartellaDaEliminare, true);
+                            MessageBox.Show("Stile eliminato con successo.", "Eliminazione completata", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                            // Ricarico graficamente la lista stili aggiornata
+                            CaricaListaStili(_baseStylesPath);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Si è verificato un errore durante l'eliminazione:\n{ex.Message}", "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Seleziona prima lo stile che desideri eliminare!", "Attenzione", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
     }
 }

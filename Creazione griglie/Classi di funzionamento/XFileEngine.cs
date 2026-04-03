@@ -384,19 +384,23 @@ namespace DirectXEditor
                     continue;
 
                 string texBlock = "";
+
+                // Formattazione corretta del blocco TextureFilename come si aspetta DirectX
                 if (!mesh.RemoveTexture && !string.IsNullOrEmpty(mesh.NewTexturePath))
                 {
-                    texBlock = $"\n  TextureFilename {{\n   \"{Path.GetFileName(mesh.NewTexturePath)}\";\n  }}\n";
+                    texBlock = $"  TextureFilename {{\r\n   \"{Path.GetFileName(mesh.NewTexturePath)}\";\r\n  }}\r\n";
                 }
                 else if (!mesh.RemoveTexture && !string.IsNullOrEmpty(mesh.TextureName))
                 {
-                    texBlock = $"\n  TextureFilename {{\n   \"{Path.GetFileName(mesh.TextureName)}\";\n  }}\n";
+                    texBlock = $"  TextureFilename {{\r\n   \"{Path.GetFileName(mesh.TextureName)}\";\r\n  }}\r\n";
                 }
 
-                string newContent = $"\n  {(mesh.MeshColor.R / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.MeshColor.G / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.MeshColor.B / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{mesh.Alpha.ToString("0.000000", CultureInfo.InvariantCulture)};;\n" +
-                                    $"  {mesh.Power.ToString("0.000000", CultureInfo.InvariantCulture)};\n" +
-                                    $"  {(mesh.Specular.R / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.Specular.G / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.Specular.B / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};;\n" +
-                                    $"  {(mesh.Emissive.R / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.Emissive.G / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.Emissive.B / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};;{texBlock}";
+                // Inserisco uno \r\n prima di chiudere la stringa per spingere la parentesi finale } del Material sulla riga successiva
+                string newContent = $"\r\n  {(mesh.MeshColor.R / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.MeshColor.G / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.MeshColor.B / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{mesh.Alpha.ToString("0.000000", CultureInfo.InvariantCulture)};;\r\n" +
+                                    $"  {mesh.Power.ToString("0.000000", CultureInfo.InvariantCulture)};\r\n" +
+                                    $"  {(mesh.Specular.R / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.Specular.G / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.Specular.B / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};;\r\n" +
+                                    $"  {(mesh.Emissive.R / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.Emissive.G / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.Emissive.B / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};;\r\n" +
+                                    $"{texBlock}";
 
                 testoModificato = testoModificato.Replace(mesh.OriginalMaterialContent, newContent);
                 elaborati.Add(mesh.OriginalMaterialContent);
