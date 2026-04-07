@@ -111,7 +111,7 @@ namespace Creazione_griglie
     public partial class MainWindow : Window
     {
         private string BaseStylesPath;
-        private string InternalStylesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "BaseStyles");
+        private string InternalStylesPath = EmbeddedResourceManager.GetTempStylesPath();
 
         private string cartellaAttuale = "";
         private string cartellaPadre = "";
@@ -133,13 +133,15 @@ namespace Creazione_griglie
             listaGruppiGalleria.ItemsSource = GruppiGalleria;
 
             btnSalva.IsEnabled = false;
+
+            // Cerco gli stili esterni
             BaseStylesPath = StyleEnvironment.TrovaPercorsoStili();
 
-            if (string.IsNullOrEmpty(BaseStylesPath))
+            // Verifico se l'estrazione è andata a buon fine
+            if (!Directory.Exists(InternalStylesPath) || !Directory.EnumerateFileSystemEntries(InternalStylesPath).Any())
             {
-                MessageBox.Show(Application.Current.TryFindResource("MsgCartellaNonTrovata") as string ?? "Cartella non trovata",
-                                Application.Current.TryFindResource("MsgErrore") as string ?? "Errore",
-                                MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Errore: Le risorse BaseStyles non sono state caricate correttamente nell'eseguibile.\n\nControlla che i file siano presenti nel progetto e che l'azione di compilazione sia 'Risorsa incorporata'.",
+                                "Risorse Mancanti", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
