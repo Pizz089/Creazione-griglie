@@ -1,0 +1,48 @@
+﻿<Window x:Class="Creazione_griglie.StartupDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Benvenuto" Height="380" Width="480"
+        WindowStartupLocation="CenterScreen" 
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False">
+
+    <Border Background="{DynamicResource BgFinestra}" CornerRadius="8" BorderBrush="{DynamicResource ColorePrimario}" BorderThickness="1" Effect="{StaticResource OmbraPopUp}" Margin="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="{DynamicResource BgCard}" CornerRadius="8,8,0,0" Padding="15">
+                <Grid>
+                    <TextBlock Text="{DynamicResource StrBenvenuto}" FontWeight="Bold" FontSize="18" Foreground="{DynamicResource TestoPrincipale}" VerticalAlignment="Center"/>
+                    <Button Width="30" Height="30" HorizontalAlignment="Right" Style="{StaticResource BaseCardButtonStyle}" Click="BtnChiudi_Click" Padding="6">
+                        <Path Data="{StaticResource IconDataClose}" Fill="{DynamicResource TestoPrincipale}" Stretch="Uniform"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="1" Margin="25">
+                <TextBlock Text="{DynamicResource StrScegliLingua}" Foreground="{DynamicResource TestoSecondario}" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <ComboBox x:Name="cmbLingua" SelectedIndex="0" Margin="0,0,0,25" Padding="10" SelectionChanged="CmbLingua_SelectionChanged">
+                    <ComboBoxItem Content="🇮🇹 Italiano"/>
+                    <ComboBoxItem Content="🇬🇧 English"/>
+                </ComboBox>
+
+                <Button Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource ColorePrimario}" Padding="15" Margin="0,0,0,15" Click="BtnCreaNuovo_Click">
+                    <StackPanel>
+                        <TextBlock Text="{DynamicResource StrCreaNuovo}" FontWeight="Bold" FontSize="16" Foreground="White" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{DynamicResource StrDescCreaNuovo}" Foreground="#E0E0E0" FontSize="12" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Padding="15" Click="BtnModifica_Click">
+                    <StackPanel>
+                        <TextBlock Text="{DynamicResource StrModificaEsistente}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TestoPrincipale}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{DynamicResource StrDescModificaEsistente}" Foreground="{DynamicResource TestoSecondario}" FontSize="12" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

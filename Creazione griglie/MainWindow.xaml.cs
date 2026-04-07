@@ -4,15 +4,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Xml;
 
-namespace DirectXEditor
+namespace Creazione_griglie
 {
     // Struttura dati per le miniature
     public class ViewportItem
@@ -23,14 +25,12 @@ namespace DirectXEditor
         public MeshData FileRoot { get; set; }
     }
 
-    // Gestisco le famiglie separate visivamente in galleria
     public class GalleriaGroup
     {
         public string NomeGruppo { get; set; }
         public ObservableCollection<ViewportItem> Elementi { get; set; } = new ObservableCollection<ViewportItem>();
     }
 
-    // --- CLASSI PER IL SISTEMA DI UNDO ---
     public class MementoState
     {
         public MeshData Target { get; private set; }
@@ -45,7 +45,6 @@ namespace DirectXEditor
         public double TextureScale { get; private set; }
         public double TextureRotation { get; private set; }
 
-        // Scatta la foto allo stato attuale
         public MementoState(MeshData target)
         {
             Target = target;
@@ -61,7 +60,6 @@ namespace DirectXEditor
             TextureRotation = target.TextureRotation;
         }
 
-        // Ripristina lo stato memorizzato
         public void Restore(string cartellaAttuale, string cartellaPadre)
         {
             Target.MeshColor = MeshColor;
@@ -109,7 +107,6 @@ namespace DirectXEditor
         public void Clear() => history.Clear();
         public bool CanUndo => history.Count > 0;
     }
-    // -------------------------------------
 
     public partial class MainWindow : Window
     {
@@ -126,7 +123,6 @@ namespace DirectXEditor
         private MeshData fileAttivoVisibile = null;
         private bool isUpdatingZoom = false;
 
-        // Inizializzo il manager dello storico
         private UndoManager _undoManager = new UndoManager();
 
         public MainWindow()
@@ -137,16 +133,109 @@ namespace DirectXEditor
             listaGruppiGalleria.ItemsSource = GruppiGalleria;
 
             btnSalva.IsEnabled = false;
-
             BaseStylesPath = StyleEnvironment.TrovaPercorsoStili();
 
             if (string.IsNullOrEmpty(BaseStylesPath))
             {
-                MessageBox.Show("Attenzione: Impossibile trovare la cartella degli stili.\n\nHo cercato il collegamento 'Focus' sul Desktop e il percorso standard, ma senza successo.\n\nAssicurati che il software Steltronic sia installato correttamente.", "Cartella Non Trovata", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.TryFindResource("MsgCartellaNonTrovata") as string ?? "Cartella non trovata",
+                                Application.Current.TryFindResource("MsgErrore") as string ?? "Errore",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        // --- SISTEMA DI UNDO (METODI) ---
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            IntPtr handle = new WindowInteropHelper(this).Handle;
+            HwndSource.FromHwnd(handle)?.AddHook(WindowProc);
+        }
+
+        private IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg == 0x0024)
+            {
+                WmGetMinMaxInfo(hwnd, lParam);
+                handled = true;
+            }
+            return IntPtr.Zero;
+        }
+
+        private void WmGetMinMaxInfo(IntPtr hwnd, IntPtr lParam)
+        {
+            MINMAXINFO mmi = (MINMAXINFO)Marshal.PtrToStructure(lParam, typeof(MINMAXINFO));
+            IntPtr monitor = MonitorFromWindow(hwnd, 2);
+
+            if (monitor != IntPtr.Zero)
+            {
+                MONITORINFO monitorInfo = new MONITORINFO();
+                monitorInfo.cbSize = Marshal.SizeOf(typeof(MONITORINFO));
+                GetMonitorInfo(monitor, ref monitorInfo);
+
+                RECT rcWorkArea = monitorInfo.rcWork;
+                RECT rcMonitorArea = monitorInfo.rcMonitor;
+
+                mmi.ptMaxPosition.X = Math.Abs(rcWorkArea.Left - rcMonitorArea.Left);
+                mmi.ptMaxPosition.Y = Math.Abs(rcWorkArea.Top - rcMonitorArea.Top);
+                mmi.ptMaxSize.X = Math.Abs(rcWorkArea.Right - rcWorkArea.Left);
+                mmi.ptMaxSize.Y = Math.Abs(rcWorkArea.Bottom - rcWorkArea.Top);
+            }
+
+            Marshal.StructureToPtr(mmi, lParam, true);
+        }
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr MonitorFromWindow(IntPtr handle, uint flags);
+
+        [DllImport("user32.dll")]
+        private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT { public int X; public int Y; }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MINMAXINFO
+        {
+            public POINT ptReserved;
+            public POINT ptMaxSize;
+            public POINT ptMaxPosition;
+            public POINT ptMinTrackSize;
+            public POINT ptMaxTrackSize;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public struct MONITORINFO
+        {
+            public int cbSize;
+            public RECT rcMonitor;
+            public RECT rcWork;
+            public uint dwFlags;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT { public int Left; public int Top; public int Right; public int Bottom; }
+
+        private void Minimize_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void MaximizeRestore_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
+            {
+                this.WindowState = WindowState.Normal;
+            }
+            else
+            {
+                this.WindowState = WindowState.Maximized;
+            }
+        }
+
+        private void Close_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
         private void RegistraStatoUndo(List<MeshData> targets)
         {
             if (targets == null || targets.Count == 0) return;
@@ -171,13 +260,14 @@ namespace DirectXEditor
             }
             btnUndo.IsEnabled = _undoManager.CanUndo;
         }
-        // --------------------------------
 
         private void BtnCarica_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(BaseStylesPath) || !Directory.Exists(BaseStylesPath))
             {
-                MessageBox.Show("La cartella base degli stili non esiste. Impossibile caricare.", "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.TryFindResource("MsgCartellaNonTrovata") as string ?? "Cartella non trovata",
+                                Application.Current.TryFindResource("MsgErrore") as string ?? "Errore",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -283,14 +373,13 @@ namespace DirectXEditor
 
                 btnSalva.IsEnabled = !StyleEnvironment.IsStyleProtected(Path.GetFileName(cartellaAttuale));
 
-                // Resetto lo storico all'apertura di un nuovo stile
                 _undoManager.Clear();
                 btnUndo.IsEnabled = false;
 
                 if (fileCaricatiConSuccesso > 0)
-                    txtStatus.Text = $"Stile caricato con {fileCaricatiConSuccesso} componenti chiave.";
+                    txtStatus.Text = $"Stile caricato con {fileCaricatiConSuccesso} componenti. / Style loaded with {fileCaricatiConSuccesso} components.";
                 else
-                    txtStatus.Text = $"Attenzione: nessuno dei componenti chiave trovato.";
+                    txtStatus.Text = $"Attenzione: nessun componente trovato. / Warning: no components found.";
 
                 masterRoot.IsSelected = true;
             }
@@ -554,7 +643,9 @@ namespace DirectXEditor
                 pannelloProprieta.IsEnabled = true;
                 txtNomeSelezionato.Text = pezzoSelezionato.Name;
                 rectColore.Background = new SolidColorBrush(pezzoSelezionato.MeshColor);
-                txtTexturePath.Text = pezzoSelezionato.RemoveTexture ? "Rimossa" : Path.GetFileName(pezzoSelezionato.TextureName);
+
+                string labelNessuna = Application.Current.TryFindResource("StrNessuna") as string ?? "Nessuna";
+                txtTexturePath.Text = pezzoSelezionato.RemoveTexture ? labelNessuna : Path.GetFileName(pezzoSelezionato.TextureName);
 
                 slZoomSkin.Value = pezzoSelezionato.TextureScale;
                 txtZoomSkin.Text = pezzoSelezionato.TextureScale.ToString("0.00");
@@ -562,13 +653,11 @@ namespace DirectXEditor
             else
             {
                 pannelloProprieta.IsEnabled = false;
-                txtNomeSelezionato.Text = "Nessuna selezione";
+                txtNomeSelezionato.Text = Application.Current.TryFindResource("StrNessunaSelezione") as string ?? "Nessuna selezione";
             }
             isUpdatingZoom = false;
         }
 
-        // --- GESTIONE UNDO DELLO ZOOM ---
-        // Salvo lo stato appena prima che l'utente inizi a trascinare lo slider o cliccare la textbox
         private void Zoom_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (pezzoSelezionato != null && !isUpdatingZoom)
@@ -619,7 +708,7 @@ namespace DirectXEditor
         {
             if (pezzoSelezionato?.Geometry == null || pezzoSelezionato.Geometry.TextureCoordinates.Count == 0) return;
 
-            RegistraStatoUndo(TrovaElementiCoinvolti()); // Fotografo prima di riadattare
+            RegistraStatoUndo(TrovaElementiCoinvolti());
 
             double maxU = 0;
             foreach (var uv in pezzoSelezionato.Geometry.TextureCoordinates) if (uv.X > maxU) maxU = uv.X;
@@ -644,16 +733,9 @@ namespace DirectXEditor
                     if (pathTrovato != null)
                     {
                         startDiffuse = MeshHelper.EstraiColoreDaImmagine(pathTrovato);
-
                         startSpecular = Color.FromRgb(60, 60, 60);
                         startPower = 40.0;
                         startEmissive = Colors.Black;
-
-                        var coloreEsistente = ModernColorPicker.ListaRecenti.FirstOrDefault(b => b.Color == startDiffuse);
-                        if (coloreEsistente != null) ModernColorPicker.ListaRecenti.Remove(coloreEsistente);
-
-                        ModernColorPicker.ListaRecenti.Insert(0, new SolidColorBrush(startDiffuse));
-                        if (ModernColorPicker.ListaRecenti.Count > 10) ModernColorPicker.ListaRecenti.RemoveAt(ModernColorPicker.ListaRecenti.Count - 1);
                     }
                 }
 
@@ -663,7 +745,7 @@ namespace DirectXEditor
                 if (cp.ShowDialog() == true)
                 {
                     List<MeshData> targetMeshes = TrovaElementiCoinvolti();
-                    RegistraStatoUndo(targetMeshes); // Fotografo prima di colorare
+                    RegistraStatoUndo(targetMeshes);
 
                     foreach (var m in targetMeshes)
                     {
@@ -672,7 +754,6 @@ namespace DirectXEditor
                         m.Specular = cp.FinalSpecular;
                         m.Emissive = cp.FinalEmissive;
                         m.Power = cp.FinalPower;
-
                         m.HasColor = true;
                         m.RemoveTexture = true;
                         m.NewTexturePath = "";
@@ -687,7 +768,7 @@ namespace DirectXEditor
 
                     ApplicaTrasparenzaAlModello3D();
                     AggiornaPannelloProprieta();
-                    txtStatus.Text = $"Materiale applicato a {targetMeshes.Count} elementi.";
+                    txtStatus.Text = $"Materiale applicato a {targetMeshes.Count} elementi. / Material applied.";
                 }
             }
         }
@@ -700,7 +781,7 @@ namespace DirectXEditor
             if (ofd.ShowDialog() == true)
             {
                 List<MeshData> targetMeshes = TrovaElementiCoinvolti();
-                RegistraStatoUndo(targetMeshes); // Fotografo prima di applicare la pelle
+                RegistraStatoUndo(targetMeshes);
 
                 foreach (var m in targetMeshes)
                 {
@@ -716,7 +797,7 @@ namespace DirectXEditor
                     }
                 }
                 AggiornaPannelloProprieta();
-                txtStatus.Text = $"Skin caricata su {targetMeshes.Count} elementi.";
+                txtStatus.Text = $"Skin caricata su {targetMeshes.Count} elementi. / Skin loaded.";
             }
         }
 
@@ -725,13 +806,12 @@ namespace DirectXEditor
             if (pezzoSelezionato == null) return;
 
             List<MeshData> targetMeshes = TrovaElementiCoinvolti();
-            RegistraStatoUndo(targetMeshes); // Fotografo prima di rimuovere la pelle
+            RegistraStatoUndo(targetMeshes);
 
             foreach (var m in targetMeshes)
             {
                 m.RemoveTexture = true;
                 m.TextureRotation = 0;
-
                 m.Specular = Color.FromRgb(60, 60, 60);
                 m.Power = 40.0;
                 m.Emissive = Colors.Black;
@@ -777,7 +857,6 @@ namespace DirectXEditor
                 else
                 {
                     Material copia = m.OriginalMaterial.Clone();
-
                     if (copia is MaterialGroup g)
                     {
                         foreach (var c in g.Children)
@@ -820,17 +899,18 @@ namespace DirectXEditor
 
             if (StyleEnvironment.IsStyleProtected(nomeCartellaAttuale))
             {
-                MessageBox.Show($"Impossibile sovrascrivere lo stile di sistema '{nomeCartellaAttuale}'.\n\nGli stili da 0 a 12 e gli stili L1, L2, L3 sono protetti. Utilizza il pulsante 'Salva con nome' per creare un nuovo stile modificabile.", "Salvataggio Bloccato", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.TryFindResource("MsgStileProtetto") as string ?? "Impossibile sovrascrivere lo stile di sistema.",
+                                Application.Current.TryFindResource("MsgAttenzione") as string ?? "Attenzione",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            MessageBoxResult result = MessageBox.Show(
-                $"Vuoi davvero sovrascrivere lo stile '{nomeCartellaAttuale}'?",
-                "Conferma Salvataggio", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-
+            MessageBoxResult result = MessageBox.Show(Application.Current.TryFindResource("MsgSovrascrivi") as string ?? "Vuoi sovrascrivere?",
+                                                      Application.Current.TryFindResource("MsgConferma") as string ?? "Conferma",
+                                                      MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result == MessageBoxResult.Yes && EseguiSalvataggio(cartellaAttuale))
             {
-                txtStatus.Text = "Stile sovrascritto con successo!";
+                txtStatus.Text = "Stile sovrascritto con successo! / Style successfully saved!";
             }
         }
 
@@ -839,14 +919,16 @@ namespace DirectXEditor
             if (alberoGerarchico.Count == 0 || string.IsNullOrEmpty(cartellaAttuale)) return;
             if (string.IsNullOrEmpty(BaseStylesPath))
             {
-                MessageBox.Show("Cartella degli stili non trovata. Impossibile salvare.", "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.TryFindResource("MsgCartellaNonTrovata") as string ?? "Cartella non trovata",
+                                Application.Current.TryFindResource("MsgErrore") as string ?? "Errore",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             string nuovoNome = StyleEnvironment.GetNextAvailableStyleName(BaseStylesPath);
-            MessageBoxResult result = MessageBox.Show(
-                $"Il nuovo stile verrà salvato automaticamente come:\n\n{nuovoNome}\n\nVuoi procedere?",
-                "Salvataggio Nuovo Stile", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            MessageBoxResult result = MessageBox.Show(Application.Current.TryFindResource("MsgNuovoStile") as string ?? "Il nuovo stile verrà salvato, procedo?",
+                                                      Application.Current.TryFindResource("MsgConferma") as string ?? "Conferma",
+                                                      MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
@@ -854,7 +936,9 @@ namespace DirectXEditor
                 try { Directory.CreateDirectory(cartellaDest); }
                 catch (UnauthorizedAccessException)
                 {
-                    MessageBox.Show("Errore permessi. Avvia come Amministratore.", "Accesso Negato", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Errore permessi. Avvia come Amministratore. / Access Denied.",
+                                    Application.Current.TryFindResource("MsgErrore") as string ?? "Errore",
+                                    MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -862,13 +946,14 @@ namespace DirectXEditor
                 {
                     foreach (string dir in Directory.GetDirectories(cartellaAttuale, "*", SearchOption.AllDirectories))
                         Directory.CreateDirectory(dir.Replace(cartellaAttuale, cartellaDest));
-
                     foreach (string file in Directory.GetFiles(cartellaAttuale, "*.*", SearchOption.AllDirectories))
                         File.Copy(file, file.Replace(cartellaAttuale, cartellaDest), true);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Errore durante la copia dei file originali: " + ex.Message, "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"{(Application.Current.TryFindResource("MsgErrore") as string)}: {ex.Message}",
+                                    Application.Current.TryFindResource("MsgErrore") as string ?? "Errore",
+                                    MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -877,12 +962,11 @@ namespace DirectXEditor
                     cartellaAttuale = cartellaDest;
                     alberoGerarchico[0].Name = nuovoNome.ToUpper();
                     btnSalva.IsEnabled = true;
-                    txtStatus.Text = $"Nuovo stile '{nuovoNome}' salvato con successo!";
+                    txtStatus.Text = $"Nuovo stile salvato / New style saved!";
                 }
             }
         }
 
-        // Eseguo il salvataggio fisico del file .x sul disco
         private bool EseguiSalvataggio(string cartellaDestinazione)
         {
             try
@@ -925,20 +1009,20 @@ namespace DirectXEditor
                         File.WriteAllText(fullDestPath, nuovoTestoX);
                     }
 
-                    // ---> NUOVO: Salvo lo sfondo nell'XML al momento del salvataggio globale
                     if (viewPortMassimizzato.Background is SolidColorBrush bgBrush)
                     {
                         SalvaSfondoInXML(bgBrush.Color, cartellaDestinazione);
                     }
 
-                    // Delega a ThumbnailGenerator
                     ThumbnailGenerator.GeneraIcona(cartellaDestinazione, alberoGerarchico[0], cartellaAttuale, cartellaPadre);
                 }
                 return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Errore durante il salvataggio:\n{ex.Message}", "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"{(Application.Current.TryFindResource("MsgErrore") as string)}: {ex.Message}",
+                                Application.Current.TryFindResource("MsgErrore") as string ?? "Errore",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
         }
@@ -957,16 +1041,16 @@ namespace DirectXEditor
             }
         }
 
-        // --- CAMBIO SFONDO CON COLORE SOLIDO ---
         private void BtnSfondoColore_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(cartellaAttuale))
             {
-                MessageBox.Show("Carica prima uno stile per poter cambiare lo sfondo.", "Attenzione", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(Application.Current.TryFindResource("MsgSelezionaPrima") as string ?? "Carica uno stile",
+                                Application.Current.TryFindResource("MsgAttenzione") as string ?? "Attenzione",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Prelevo il colore attuale per passarlo al selettore
             Color coloreBase = Color.FromRgb(30, 34, 43);
             if (viewPortMassimizzato.Background is SolidColorBrush brushEsistente)
             {
@@ -978,20 +1062,15 @@ namespace DirectXEditor
 
             if (cp.ShowDialog() == true)
             {
-                // Cambio lo sfondo visivo in RAM
                 viewPortMassimizzato.Background = new SolidColorBrush(cp.FinalColor);
-
-                // Abilito il pulsante Salva per informare l'utente che ci sono modifiche pendenti
                 btnSalva.IsEnabled = true;
             }
         }
 
-        // --- SALVATAGGIO COLORE SFONDO (Puro e nativo Steltronic) ---
         private void SalvaSfondoInXML(Color coloreFinale, string cartellaDestinazione)
         {
             try
             {
-                // Ora usa la cartella di destinazione (che varia se fai "Salva con Nome")
                 string pathXml = Path.Combine(cartellaDestinazione, "Lights.xml");
                 if (!File.Exists(pathXml)) return;
 
@@ -999,7 +1078,6 @@ namespace DirectXEditor
                 doc.Load(pathXml);
                 XmlNode root = doc.DocumentElement;
 
-                // Aggiorno o Creo il blocco bkgColor nel formato nativo atteso dal gioco (0.00 - 1.00)
                 XmlNodeList colorNodes = doc.GetElementsByTagName("bkgColor");
                 XmlNode bgNode = colorNodes.Count > 0 ? colorNodes[0] : null;
 
@@ -1011,12 +1089,7 @@ namespace DirectXEditor
                 bgNode.RemoveAll();
 
                 string[] canali = { "Alpha", "Red", "Green", "Blue" };
-                double[] valori = {
-                    coloreFinale.A / 255.0,
-                    coloreFinale.R / 255.0,
-                    coloreFinale.G / 255.0,
-                    coloreFinale.B / 255.0
-                };
+                double[] valori = { coloreFinale.A / 255.0, coloreFinale.R / 255.0, coloreFinale.G / 255.0, coloreFinale.B / 255.0 };
 
                 for (int i = 0; i < canali.Length; i++)
                 {
@@ -1029,7 +1102,7 @@ namespace DirectXEditor
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Errore durante il salvataggio dello sfondo: " + ex.Message);
+                MessageBox.Show($"{(Application.Current.TryFindResource("MsgErrore") as string)}: {ex.Message}");
             }
         }
 
@@ -1075,6 +1148,32 @@ namespace DirectXEditor
                 }
             }
             return defaultVal;
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.Opacity = 0;
+
+            StartupDialog dialog = new StartupDialog();
+            dialog.Owner = this;
+            dialog.ShowDialog();
+
+            if (dialog.SceltaUtente == StartupAction.Nessuna)
+            {
+                this.Close();
+                return;
+            }
+
+            this.Opacity = 1;
+
+            if (dialog.SceltaUtente == StartupAction.CreaNuovo)
+            {
+                BtnGestioneStili_Click(null, null);
+            }
+            else if (dialog.SceltaUtente == StartupAction.Modifica)
+            {
+                BtnCarica_Click(null, null);
+            }
         }
     }
 }

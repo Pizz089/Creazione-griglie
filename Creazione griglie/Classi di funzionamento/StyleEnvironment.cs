@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace DirectXEditor
+namespace Creazione_griglie
 {
     // Gestisco le regole di sistema, i percorsi e la numerazione degli stili
     public static class StyleEnvironment

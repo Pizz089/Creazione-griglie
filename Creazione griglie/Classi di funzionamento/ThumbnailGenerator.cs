@@ -7,7 +7,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 
-namespace DirectXEditor
+namespace Creazione_griglie
 {
     // Motore integrato per la generazione off-screen dell'anteprima icon.jpg
     public static class ThumbnailGenerator

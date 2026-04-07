@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace DirectXEditor
+namespace Creazione_griglie
 {
     public partial class FlatColorPicker : Window
     {

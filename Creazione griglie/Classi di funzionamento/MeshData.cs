@@ -6,7 +6,7 @@ using System.Windows.Media.Media3D;
 using Color = System.Windows.Media.Color;
 using Colors = System.Windows.Media.Colors;
 
-namespace DirectXEditor
+namespace Creazione_griglie
 {
     public class MeshData : INotifyPropertyChanged
     {

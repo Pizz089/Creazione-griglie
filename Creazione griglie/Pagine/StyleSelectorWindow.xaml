@@ -1,7 +1,7 @@
-﻿<Window x:Class="DirectXEditor.StyleSelectorWindow"
+﻿<Window x:Class="Creazione_griglie.StyleSelectorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Seleziona Stile" Width="550" Height="700"
+        Title="{DynamicResource StrTitoloStili}" Width="550" Height="700"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="{DynamicResource BgCard}" Foreground="{DynamicResource TestoPrincipale}">
 
@@ -12,7 +12,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Stili Disponibili:" FontWeight="Bold" FontSize="20" Margin="0,0,0,15" Foreground="White" HorizontalAlignment="Center" />
+        <TextBlock Grid.Row="0" Text="{DynamicResource StrStiliDisponibili}" FontWeight="Bold" FontSize="20" Margin="0,0,0,15" Foreground="White" HorizontalAlignment="Center" />
 
         <Border Grid.Row="1" Margin="0,16,0,16"
               Background="{DynamicResource BgFinestra}"
@@ -30,14 +30,14 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Button x:Name="btnElimina" Grid.Column="0" Content="🗑 Elimina Stile" 
+            <Button x:Name="btnElimina" Grid.Column="0" Content="{DynamicResource StrEliminaStile}" 
                     Margin="0,0,5,0" Padding="12" 
                     Background="#FFD32F2F" Foreground="White" 
                     FontSize="16" FontWeight="Bold" Cursor="Hand"
                     Style="{StaticResource BaseCardButtonStyle}" 
                     Click="BtnElimina_Click" />
 
-            <Button Grid.Column="1" x:Name="btnOk" Content="Carica Stile" 
+            <Button Grid.Column="1" x:Name="btnOk" Content="{DynamicResource StrCaricaStile}" 
                     Margin="5,0,0,0" Padding="12" 
                     Background="#FF1E88E5" Foreground="White" 
                     FontSize="16" FontWeight="Bold" Cursor="Hand"

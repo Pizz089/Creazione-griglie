@@ -9,7 +9,7 @@ using Color = System.Windows.Media.Color;
 using Colors = System.Windows.Media.Colors;
 using Point = System.Windows.Point;
 
-namespace DirectXEditor
+namespace Creazione_griglie
 {
     public class MaterialDef
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace DirectXEditor
+namespace Creazione_griglie
 {
     // Definisco la radice del documento XML che descrive lo stile
     [XmlRoot("Stile")]

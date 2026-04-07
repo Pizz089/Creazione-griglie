@@ -9,6 +9,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Stili e Tema/Tema.xaml"/>
                 <ResourceDictionary Source="/Stili e Tema/Stili.xaml"/>
+                <ResourceDictionary Source="/Lingue/Stringhe_IT.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

@@ -1,0 +1,77 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="StrBenvenuto">Benvenuto in Editor 3D</sys:String>
+    <sys:String x:Key="StrScegliLingua">Seleziona la lingua / Select Language</sys:String>
+    <sys:String x:Key="StrCreaNuovo">Crea Nuovo Stile</sys:String>
+    <sys:String x:Key="StrDescCreaNuovo">Parti da un modello base di sistema</sys:String>
+    <sys:String x:Key="StrModificaEsistente">Modifica Stile Esistente</sys:String>
+    <sys:String x:Key="StrDescModificaEsistente">Carica un progetto salvato in precedenza</sys:String>
+
+    <sys:String x:Key="StrCarica">Carica</sys:String>
+    <sys:String x:Key="StrSalva">Salva</sys:String>
+    <sys:String x:Key="StrSalvaNome">Salva con nome</sys:String>
+    <sys:String x:Key="StrStiliDef">Stili Predefiniti</sys:String>
+    <sys:String x:Key="StrAnnulla">Annulla</sys:String>
+    <sys:String x:Key="StrRipristina">Ripristina Vista</sys:String>
+
+    <sys:String x:Key="StrGerarchia">Gerarchia Elementi</sys:String>
+    <sys:String x:Key="StrComandi">Comandi 3D</sys:String>
+    <sys:String x:Key="StrSeleziona">Seleziona</sys:String>
+    <sys:String x:Key="StrRuota">Ruota vista</sys:String>
+    <sys:String x:Key="StrPan">Sposta (Pan)</sys:String>
+    <sys:String x:Key="StrZoom">Zoom</sys:String>
+
+    <sys:String x:Key="StrTornaGalleria">⬅ Torna alla Galleria</sys:String>
+    <sys:String x:Key="StrIngrandisci">🔍 Ingrandisci</sys:String>
+
+    <sys:String x:Key="StrProprieta">Proprietà Oggetto</sys:String>
+    <sys:String x:Key="StrNessunaSelezione">Nessuna selezione</sys:String>
+    <sys:String x:Key="StrApplicaTutti">Applica a tutti gli oggetti simili</sys:String>
+    <sys:String x:Key="StrSfondoVisual">Sfondo Visualizzatore (Stile)</sys:String>
+    <sys:String x:Key="StrCambiaSfondo">🎨 Cambia Colore di Sfondo</sys:String>
+    <sys:String x:Key="StrColore">Colore</sys:String>
+    <sys:String x:Key="StrModifica">Modifica</sys:String>
+    <sys:String x:Key="StrImgTexture">Immagine Texture</sys:String>
+    <sys:String x:Key="StrNessuna">Nessuna</sys:String>
+    <sys:String x:Key="StrSfoglia">Sfoglia...</sys:String>
+    <sys:String x:Key="StrRimuovi">Rimuovi</sys:String>
+    <sys:String x:Key="StrZoomSkin">Zoom Skin (Scala UV)</sys:String>
+    <sys:String x:Key="StrAdattaImg">Adatta l'immagine</sys:String>
+
+    <sys:String x:Key="StrTitoloSfondo">Colore di Sfondo</sys:String>
+    <sys:String x:Key="StrRosso">R (Rosso)</sys:String>
+    <sys:String x:Key="StrVerde">G (Verde)</sys:String>
+    <sys:String x:Key="StrBlu">B (Blu)</sys:String>
+    <sys:String x:Key="StrTrasparenza">A (Trasp)</sys:String>
+    <sys:String x:Key="StrColoriPredefiniti">Colori Predefiniti</sys:String>
+    <sys:String x:Key="StrRecenti">Recenti</sys:String>
+    <sys:String x:Key="StrApplicaSfondo">Applica Sfondo</sys:String>
+    <sys:String x:Key="StrTitoloMaterial">Material Editor Avanzato</sys:String>
+    <sys:String x:Key="StrBase">Diffuse (Base)</sys:String>
+    <sys:String x:Key="StrLuce">Specular (Luce)</sys:String>
+    <sys:String x:Key="StrGlow">Emissive (Glow)</sys:String>
+    <sys:String x:Key="StrPotenzaLuce">Power (Luce)</sys:String>
+    <sys:String x:Key="StrFrontale">Normale (Frontale)</sys:String>
+    <sys:String x:Key="StrIsometrica">Isometrica</sys:String>
+    <sys:String x:Key="StrAlto">Rivolta verso l'alto</sys:String>
+    <sys:String x:Key="StrAngolo45">Angolo a 45°</sys:String>
+    <sys:String x:Key="StrApplicaModifiche">Applica Modifiche</sys:String>
+
+    <sys:String x:Key="StrTitoloStili">Seleziona Stile</sys:String>
+    <sys:String x:Key="StrStiliDisponibili">Stili Disponibili:</sys:String>
+    <sys:String x:Key="StrEliminaStile">🗑 Elimina Stile</sys:String>
+    <sys:String x:Key="StrCaricaStile">Carica Stile</sys:String>
+
+    <sys:String x:Key="MsgAttenzione">Attenzione</sys:String>
+    <sys:String x:Key="MsgErrore">Errore</sys:String>
+    <sys:String x:Key="MsgInfo">Informazione</sys:String>
+    <sys:String x:Key="MsgCartellaNonTrovata">La cartella base degli stili non esiste. Impossibile caricare.</sys:String>
+    <sys:String x:Key="MsgStileProtetto">Impossibile sovrascrivere o eliminare lo stile di sistema. Utilizza 'Salva con nome'.</sys:String>
+    <sys:String x:Key="MsgSovrascrivi">Vuoi davvero sovrascrivere lo stile attuale?</sys:String>
+    <sys:String x:Key="MsgConferma">Conferma Operazione</sys:String>
+    <sys:String x:Key="MsgNuovoStile">Il nuovo stile verrà salvato automaticamente. Vuoi procedere?</sys:String>
+    <sys:String x:Key="MsgSelezionaPrima">Seleziona prima uno stile dalla lista!</sys:String>
+    <sys:String x:Key="MsgEliminaConferma">Sei sicuro di voler eliminare definitivamente lo stile selezionato? L'operazione non è reversibile.</sys:String>
+</ResourceDictionary>

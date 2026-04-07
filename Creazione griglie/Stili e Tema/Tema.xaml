@@ -26,7 +26,5 @@
     <SolidColorBrush x:Key="BgPulsante" Color="#FF4F586D"/>
     <SolidColorBrush x:Key="BordoPulsante" Color="#FF67728A"/>
     <SolidColorBrush x:Key="BgPulsantePressed" Color="#FF3A414F"/>
-
     <SolidColorBrush x:Key="ColorePrimarioAlpha" Color="#202196F3"/>
-
 </ResourceDictionary>
