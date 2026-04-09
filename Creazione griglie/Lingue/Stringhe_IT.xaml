@@ -9,9 +9,9 @@
     <sys:String x:Key="StrModificaEsistente">Modifica Stile Esistente</sys:String>
     <sys:String x:Key="StrDescModificaEsistente">Carica un progetto salvato in precedenza</sys:String>
 
-    <sys:String x:Key="StrCarica">Carica</sys:String>
-    <sys:String x:Key="StrSalva">Salva</sys:String>
-    <sys:String x:Key="StrSalvaNome">Salva con nome</sys:String>
+    <sys:String x:Key="StrCarica">Carica stili personalizzati</sys:String>
+    <sys:String x:Key="StrSalva">Salva modifiche</sys:String>
+    <sys:String x:Key="StrSalvaNome">Salva nuovo stile</sys:String>
     <sys:String x:Key="StrStiliDef">Stili Predefiniti</sys:String>
     <sys:String x:Key="StrAnnulla">Annulla</sys:String>
     <sys:String x:Key="StrRipristina">Ripristina Vista</sys:String>
@@ -24,7 +24,7 @@
     <sys:String x:Key="StrZoom">Zoom</sys:String>
 
     <sys:String x:Key="StrTornaGalleria">⬅ Torna alla Galleria</sys:String>
-    <sys:String x:Key="StrIngrandisci">🔍 Ingrandisci</sys:String>
+    <sys:String x:Key="StrIngrandisci">🔍 Modifica</sys:String>
 
     <sys:String x:Key="StrProprieta">Proprietà Oggetto</sys:String>
     <sys:String x:Key="StrNessunaSelezione">Nessuna selezione</sys:String>

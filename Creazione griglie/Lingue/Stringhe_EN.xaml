@@ -9,9 +9,9 @@
     <sys:String x:Key="StrModificaEsistente">Edit Existing Style</sys:String>
     <sys:String x:Key="StrDescModificaEsistente">Load a previously saved project</sys:String>
 
-    <sys:String x:Key="StrCarica">Load</sys:String>
-    <sys:String x:Key="StrSalva">Save</sys:String>
-    <sys:String x:Key="StrSalvaNome">Save As</sys:String>
+    <sys:String x:Key="StrCarica">Load Custom Styles</sys:String>
+    <sys:String x:Key="StrSalva">Save Changes</sys:String>
+    <sys:String x:Key="StrSalvaNome">Save New Style</sys:String>
     <sys:String x:Key="StrStiliDef">Preset Styles</sys:String>
     <sys:String x:Key="StrAnnulla">Undo</sys:String>
     <sys:String x:Key="StrRipristina">Reset View</sys:String>
@@ -24,7 +24,7 @@
     <sys:String x:Key="StrZoom">Zoom</sys:String>
 
     <sys:String x:Key="StrTornaGalleria">⬅ Back to Gallery</sys:String>
-    <sys:String x:Key="StrIngrandisci">🔍 Maximize</sys:String>
+    <sys:String x:Key="StrIngrandisci">🔍 Modify</sys:String>
 
     <sys:String x:Key="StrProprieta">Object Properties</sys:String>
     <sys:String x:Key="StrNessunaSelezione">No selection</sys:String>

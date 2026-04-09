@@ -57,6 +57,22 @@
             <Border DockPanel.Dock="Top" Background="{DynamicResource BgCard}" Margin="10,10,10,0" Padding="6" CornerRadius="8" Effect="{StaticResource OmbraCard}">
                 <StackPanel Orientation="Horizontal">
 
+                    <Button Click="BtnGestioneStili_Click" Style="{StaticResource BaseCardButtonStyle}" Margin="4,0,0,0" Padding="15,8" Foreground="{DynamicResource TestoPrincipale}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="{StaticResource IconDataOpen}" Fill="{DynamicResource TestoPrincipale}" Stretch="Uniform" Margin="0,0,8,0" Width="16" Height="16"/>
+                            <TextBlock Text="{DynamicResource StrStiliDef}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Click="BtnSalvaConNome_Click" Style="{StaticResource BaseCardButtonStyle}" Margin="4,0,0,0" Padding="15,8" Foreground="{DynamicResource TestoPrincipale}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="{StaticResource IconDataSave}" Fill="{DynamicResource TestoPrincipale}" Stretch="Uniform" Margin="0,0,8,0" Width="16" Height="16"/>
+                            <TextBlock Text="{DynamicResource StrSalvaNome}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Border Width="1" Background="{DynamicResource ColoreBordoCard}" Margin="15,4" CornerRadius="1"/>
+
                     <Button Click="BtnCarica_Click" Style="{StaticResource BaseCardButtonStyle}" Margin="4,0,0,0" Padding="15,8" Foreground="{DynamicResource TestoPrincipale}">
                         <StackPanel Orientation="Horizontal">
                             <Path Data="{StaticResource IconDataOpen}" Fill="{DynamicResource TestoPrincipale}" Stretch="Uniform" Margin="0,0,8,0" Width="16" Height="16"/>
@@ -68,20 +84,6 @@
                         <StackPanel Orientation="Horizontal">
                             <Path Data="{StaticResource IconDataSave}" Fill="{DynamicResource TestoPrincipale}" Stretch="Uniform" Margin="0,0,8,0" Width="16" Height="16"/>
                             <TextBlock Text="{DynamicResource StrSalva}" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                        </StackPanel>
-                    </Button>
-
-                    <Button Click="BtnSalvaConNome_Click" Style="{StaticResource BaseCardButtonStyle}" Margin="4,0,0,0" Padding="15,8" Foreground="{DynamicResource TestoPrincipale}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="{StaticResource IconDataSave}" Fill="{DynamicResource TestoPrincipale}" Stretch="Uniform" Margin="0,0,8,0" Width="16" Height="16"/>
-                            <TextBlock Text="{DynamicResource StrSalvaNome}" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                        </StackPanel>
-                    </Button>
-
-                    <Button Click="BtnGestioneStili_Click" Style="{StaticResource BaseCardButtonStyle}" Margin="4,0,0,0" Padding="15,8" Foreground="{DynamicResource TestoPrincipale}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="{StaticResource IconDataStyle}" Fill="{DynamicResource TestoPrincipale}" Stretch="Uniform" Margin="0,0,8,0" Width="16" Height="16"/>
-                            <TextBlock Text="{DynamicResource StrStiliDef}" VerticalAlignment="Center" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Button>
 
@@ -291,7 +293,7 @@
                             <TextBlock Text="{DynamicResource StrProprieta}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TestoPrincipale}" Margin="0,0,0,5" TextAlignment="Center"/>
                             <TextBlock x:Name="txtNomeSelezionato" Text="{DynamicResource StrNessunaSelezione}" Foreground="{DynamicResource ColorePrimario}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,20" TextAlignment="Center"/>
 
-                            <CheckBox x:Name="chkApplicaATutti" Content="{DynamicResource StrApplicaTutti}" Style="{StaticResource ModernToggleStyle}" Margin="0,5,0,15" IsChecked="True" FontSize="14"/>
+                            <CheckBox x:Name="chkApplicaATutti" Content="{DynamicResource StrApplicaTutti}" Style="{StaticResource ModernToggleStyle}" Margin="0,5,0,15" IsChecked="True" FontSize="14" Cursor="Hand"/>
 
                             <TextBlock Text="{DynamicResource StrColore}" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold"/>
                             <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8" Margin="0,0,0,20">

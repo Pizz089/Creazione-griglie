@@ -9,25 +9,57 @@ using System.Windows.Media.Imaging;
 
 namespace Creazione_griglie
 {
+    public enum StyleFilter { All, OnlyBase, OnlyUser }
+
     public partial class StyleSelectorWindow : Window
     {
         public string SelectedStyleName { get; private set; }
         private string _baseStylesPath;
+        private StyleFilter _filter;
 
-        public StyleSelectorWindow(string baseStylesPath)
+        public StyleSelectorWindow(string baseStylesPath, StyleFilter filter = StyleFilter.OnlyBase)
         {
             InitializeComponent();
             _baseStylesPath = baseStylesPath;
+            _filter = filter;
             CaricaListaStili(_baseStylesPath);
+        }
+
+        private bool PassaFiltro(string folderName)
+        {
+            switch (_filter)
+            {
+                case StyleFilter.OnlyBase:
+                    return IsBaseNumberedStyle(folderName);
+                case StyleFilter.OnlyUser:
+                    return !StyleEnvironment.IsStyleProtected(folderName);
+                default:
+                    return IsStyleLoadable(folderName);
+            }
+        }
+
+        private static bool IsBaseNumberedStyle(string folderName)
+        {
+            string name = folderName.ToLower();
+            if (name.StartsWith("style#"))
+            {
+                string numStr = name.Substring(6);
+                if (int.TryParse(numStr, out int num))
+                    return num >= 0 && num <= 12;
+            }
+            return false;
         }
 
         private void CaricaListaStili(string baseStylesPath)
         {
             lbStili.Items.Clear();
 
+            if (string.IsNullOrEmpty(baseStylesPath) || !Directory.Exists(baseStylesPath))
+                return;
+
             string[] dirs = Directory.GetDirectories(baseStylesPath, "style#*");
             var stiliOrdinati = dirs.Select(d => Path.GetFileName(d))
-                                    .Where(IsStyleLoadable)
+                                    .Where(PassaFiltro)
                                     .OrderBy(name => EstraiNumeroStile(name))
                                     .ToList();
 

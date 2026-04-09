@@ -138,10 +138,16 @@ namespace Creazione_griglie
             BaseStylesPath = StyleEnvironment.TrovaPercorsoStili();
 
             // Verifico se l'estrazione è andata a buon fine
-            if (!Directory.Exists(InternalStylesPath) || !Directory.EnumerateFileSystemEntries(InternalStylesPath).Any())
+            // Nota: EmbeddedResourceManager.EstraiRisorseSeNecessario() ha già mostrato un errore
+            // dettagliato se 0 risorse sono state trovate; qui registriamo solo l'esito finale.
+            bool internalStylesOk = Directory.Exists(InternalStylesPath) &&
+                                    Directory.EnumerateFileSystemEntries(InternalStylesPath).Any();
+            if (!internalStylesOk)
             {
-                MessageBox.Show("Errore: Le risorse BaseStyles non sono state caricate correttamente nell'eseguibile.\n\nControlla che i file siano presenti nel progetto e che l'azione di compilazione sia 'Risorsa incorporata'.",
-                                "Risorse Mancanti", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                    $"Errore: La cartella degli stili di base è vuota o non esiste.\n\nPercorso atteso: {InternalStylesPath}\n\n" +
+                    "Controlla che i file in BaseStyles\\ abbiano 'Build Action = Embedded Resource' nel progetto.",
+                    "Stili di Base Mancanti", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -273,7 +279,19 @@ namespace Creazione_griglie
                 return;
             }
 
-            StyleSelectorWindow selWindow = new StyleSelectorWindow(BaseStylesPath);
+            bool hasUserStyles = Directory.GetDirectories(BaseStylesPath, "style#*")
+                .Select(d => Path.GetFileName(d))
+                .Any(name => !StyleEnvironment.IsStyleProtected(name));
+
+            if (!hasUserStyles)
+            {
+                MessageBox.Show("Nessuno stile personalizzato trovato.\nCrea prima un nuovo stile partendo da uno stile predefinito.",
+                                Application.Current.TryFindResource("MsgAttenzione") as string ?? "Attenzione",
+                                MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            StyleSelectorWindow selWindow = new StyleSelectorWindow(BaseStylesPath, StyleFilter.OnlyUser);
             selWindow.Owner = this;
 
             if (selWindow.ShowDialog() == true && !string.IsNullOrEmpty(selWindow.SelectedStyleName))
@@ -1033,12 +1051,20 @@ namespace Creazione_griglie
 
         private void BtnGestioneStili_Click(object sender, RoutedEventArgs e)
         {
-            StyleSelectorWindow selWindow = new StyleSelectorWindow(InternalStylesPath);
+            if (string.IsNullOrEmpty(BaseStylesPath) || !Directory.Exists(BaseStylesPath))
+            {
+                MessageBox.Show(Application.Current.TryFindResource("MsgCartellaNonTrovata") as string ?? "Cartella non trovata",
+                                Application.Current.TryFindResource("MsgErrore") as string ?? "Errore",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            StyleSelectorWindow selWindow = new StyleSelectorWindow(BaseStylesPath, StyleFilter.OnlyBase);
             selWindow.Owner = this;
 
             if (selWindow.ShowDialog() == true && !string.IsNullOrEmpty(selWindow.SelectedStyleName))
             {
-                string percorsoScelto = Path.Combine(InternalStylesPath, selWindow.SelectedStyleName);
+                string percorsoScelto = Path.Combine(BaseStylesPath, selWindow.SelectedStyleName);
                 EseguiCaricamentoFisico(percorsoScelto);
             }
         }

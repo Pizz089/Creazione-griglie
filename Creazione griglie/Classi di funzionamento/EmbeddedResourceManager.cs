@@ -8,6 +8,8 @@ namespace Creazione_griglie
 {
     public static class EmbeddedResourceManager
     {
+        private const string BaseStylesMarker = "BaseStyles.";
+
         // Ottengo il percorso della cartella Temp
         public static string GetTempStylesPath()
         {
@@ -19,55 +21,87 @@ namespace Creazione_griglie
             try
             {
                 string targetFolder = GetTempStylesPath();
+
+                // Se esistono già cartelle con il nome corretto (style#N), l'estrazione è già stata fatta
+                if (Directory.Exists(targetFolder) &&
+                    Directory.GetDirectories(targetFolder, "style#*").Length > 0)
+                    return;
+
                 Assembly assembly = Assembly.GetExecutingAssembly();
                 string[] resourceNames = assembly.GetManifestResourceNames();
+                int estratti = 0;
 
-                // Cerco la posizione della stringa "BaseStyles" nei nomi delle risorse
-                // Le risorse sono nominate come: Namespace.Cartella.Sottocartella.File.Estensione
+                // NOTA: MSBuild converte '#' in '_' nei nomi delle risorse embedded.
+                // La cartella "style#1" sul disco diventa "style_1" nel nome risorsa.
+                // Estraiamo con il nome "style_1" e poi rinominiamo in fondo.
+                //
+                // Le risorse sono nominate: Namespace.BaseStyles.style_1.candle.Base.png
                 foreach (string resourceName in resourceNames)
                 {
-                    if (resourceName.Contains(".BaseStyles."))
+                    int markerIdx = resourceName.IndexOf(BaseStylesMarker, StringComparison.Ordinal);
+                    if (markerIdx < 0) continue;
+
+                    // Il marcatore deve essere preceduto da un punto o trovarsi all'inizio
+                    if (markerIdx > 0 && resourceName[markerIdx - 1] != '.') continue;
+
+                    // Parte dopo "BaseStyles." → es. "style_1.candle.Base.png"
+                    string afterMarker = resourceName.Substring(markerIdx + BaseStylesMarker.Length);
+                    if (string.IsNullOrEmpty(afterMarker)) continue;
+
+                    int lastDot = afterMarker.LastIndexOf('.');
+                    if (lastDot < 0) continue;
+
+                    string extension = afterMarker.Substring(lastDot);     // ".png"
+                    string pathPart  = afterMarker.Substring(0, lastDot);  // "style_1.candle.Base"
+
+                    // Ricostruisco il percorso fisico (con underscore, come nel nome risorsa)
+                    string relPath = pathPart.Replace('.', Path.DirectorySeparatorChar) + extension;
+                    // = "style_1\candle\Base.png"
+
+                    string finalFilePath = Path.Combine(targetFolder, relPath);
+                    string directoryPath = Path.GetDirectoryName(finalFilePath);
+
+                    if (!Directory.Exists(directoryPath))
+                        Directory.CreateDirectory(directoryPath);
+
+                    using (Stream resourceStream = assembly.GetManifestResourceStream(resourceName))
                     {
-                        // Isolo la parte del percorso che parte da BaseStyles
-                        int index = resourceName.IndexOf(".BaseStyles.") + 1;
-                        string relativePathInAssembly = resourceName.Substring(index); // "BaseStyles.p10.recap.x"
-
-                        // Estraggo l'estensione (ultimi caratteri dopo l'ultimo punto)
-                        int lastDot = resourceName.LastIndexOf('.');
-                        string extension = resourceName.Substring(lastDot);
-
-                        // Estraggo il nome senza estensione e senza il prefisso "BaseStyles."
-                        string pathWithoutExt = resourceName.Substring(index + "BaseStyles.".Length, lastDot - (index + "BaseStyles.".Length));
-
-                        // Ricostruisco il percorso file sostituendo i punti con gli slash, tranne l'ultimo dell'estensione
-                        string finalRelativePath = pathWithoutExt.Replace('.', Path.DirectorySeparatorChar) + extension;
-
-                        string finalFilePath = Path.Combine(targetFolder, finalRelativePath);
-                        string directoryPath = Path.GetDirectoryName(finalFilePath);
-
-                        // Creo le sottocartelle fisiche in Temp
-                        if (!Directory.Exists(directoryPath))
+                        if (resourceStream == null) continue;
+                        using (FileStream fileStream = new FileStream(finalFilePath, FileMode.Create, FileAccess.Write))
                         {
-                            Directory.CreateDirectory(directoryPath);
+                            resourceStream.CopyTo(fileStream);
                         }
+                    }
 
-                        // Estraggo il file dall'EXE e lo scrivo su disco
-                        using (Stream resourceStream = assembly.GetManifestResourceStream(resourceName))
-                        {
-                            if (resourceStream != null)
-                            {
-                                using (FileStream fileStream = new FileStream(finalFilePath, FileMode.Create, FileAccess.Write))
-                                {
-                                    resourceStream.CopyTo(fileStream);
-                                }
-                            }
-                        }
+                    estratti++;
+                }
+
+                if (estratti == 0)
+                {
+                    MessageBox.Show(
+                        "Errore: nessuna risorsa BaseStyles trovata nell'eseguibile.\n\n" +
+                        "Controlla che i file in BaseStyles\\ abbiano 'Build Action = Embedded Resource'.",
+                        "Risorse Mancanti", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // MSBuild ha convertito '#' in '_': rinomino style_N → style#N
+                foreach (string dir in Directory.GetDirectories(targetFolder, "style_*"))
+                {
+                    string baseName = Path.GetFileName(dir);
+                    string suffix = baseName.Substring("style_".Length);
+                    if (suffix.Length > 0 && suffix.All(char.IsDigit))
+                    {
+                        string correctedPath = Path.Combine(targetFolder, "style#" + suffix);
+                        if (!Directory.Exists(correctedPath))
+                            Directory.Move(dir, correctedPath);
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Errore estrazione: " + ex.Message);
+                MessageBox.Show("Errore estrazione risorse: " + ex.Message, "Errore",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

@@ -12,6 +12,8 @@ namespace Creazione_griglie
         {
             string fallbackPath = @"C:\Program Files (x86)\Steltronic\Vision\MediaNova\MeshBase\Styles";
 
+            if (!Directory.Exists(fallbackPath)) fallbackPath = @"C:\Program Files (x86)\Steltronic\Vision\Media\MeshBase\Styles"; ;
+
             try
             {
                 var desktopPaths = new[] { Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
@@ -26,6 +28,7 @@ namespace Creazione_griglie
                     {
                         string targetPath = @"\\10.11.1.1\c$\Program Files (x86)\Steltronic\Vision\MediaNova\MeshBase\Styles";
                         if (Directory.Exists(targetPath)) return targetPath;
+                        else targetPath = @"\\10.11.1.1\c$\Program Files (x86)\Steltronic\Vision\Media\MeshBase\Styles";
                     }
                 }
             }
