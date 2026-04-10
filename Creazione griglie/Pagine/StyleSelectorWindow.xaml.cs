@@ -199,7 +199,7 @@ namespace Creazione_griglie
                             Directory.Delete(cartellaDaEliminare, true);
 
                             // Messaggio semplice per l'avvenuta eliminazione
-                            MessageBox.Show("Stile eliminato con successo / Style successfully deleted.",
+                            MessageBox.Show(Application.Current.TryFindResource("MsgStileEliminato") as string ?? "Stile eliminato.",
                                             Application.Current.TryFindResource("MsgInfo") as string ?? "Info",
                                             MessageBoxButton.OK, MessageBoxImage.Information);
 

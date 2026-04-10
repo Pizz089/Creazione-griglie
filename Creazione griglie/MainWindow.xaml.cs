@@ -122,6 +122,8 @@ namespace Creazione_griglie
         private MeshData pezzoSelezionato;
         private MeshData fileAttivoVisibile = null;
         private bool isUpdatingZoom = false;
+        private bool isUpdatingLuci = false;
+        private LightSettings impostazioniLuci = new LightSettings();
 
         private UndoManager _undoManager = new UndoManager();
 
@@ -285,7 +287,7 @@ namespace Creazione_griglie
 
             if (!hasUserStyles)
             {
-                MessageBox.Show("Nessuno stile personalizzato trovato.\nCrea prima un nuovo stile partendo da uno stile predefinito.",
+                MessageBox.Show(Application.Current.TryFindResource("MsgNessunStilePersonalizzato") as string ?? "Nessuno stile personalizzato trovato.",
                                 Application.Current.TryFindResource("MsgAttenzione") as string ?? "Attenzione",
                                 MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
@@ -387,6 +389,8 @@ namespace Creazione_griglie
                 alberoGerarchico.Add(masterRoot);
 
                 XmlHelper.ConfiguraLuciDaXML(fileXml, luciGroup);
+                impostazioniLuci = XmlHelper.LeggiImpostazioniLuci(fileXml);
+                PopolaTextboxLuci();
                 ApplicaSfondoDaXML();
                 SvuotaSelezione();
                 ImpostaVistaU();
@@ -403,7 +407,7 @@ namespace Creazione_griglie
 
                 masterRoot.IsSelected = true;
             }
-            catch (Exception ex) { MessageBox.Show("Errore caricamento: " + ex.Message); }
+            catch (Exception ex) { MessageBox.Show((Application.Current.TryFindResource("MsgErroreCaricamento") as string ?? "Errore caricamento: ") + ex.Message); }
         }
 
         private void MostraGalleria(MeshData cartella)
@@ -662,6 +666,7 @@ namespace Creazione_griglie
             {
                 pannelloProprieta.IsEnabled = true;
                 txtNomeSelezionato.Text = pezzoSelezionato.Name;
+                btnInfoOggetto.Visibility = Visibility.Visible;
                 rectColore.Background = new SolidColorBrush(pezzoSelezionato.MeshColor);
 
                 string labelNessuna = Application.Current.TryFindResource("StrNessuna") as string ?? "Nessuna";
@@ -673,9 +678,92 @@ namespace Creazione_griglie
             else
             {
                 pannelloProprieta.IsEnabled = false;
+                btnInfoOggetto.Visibility = Visibility.Collapsed;
                 txtNomeSelezionato.Text = Application.Current.TryFindResource("StrNessunaSelezione") as string ?? "Nessuna selezione";
             }
             isUpdatingZoom = false;
+        }
+
+        private void BtnInfoOggetto_Click(object sender, RoutedEventArgs e)
+        {
+            if (pezzoSelezionato?.Geometry == null) return;
+
+            var bounds = pezzoSelezionato.Geometry.Bounds;
+            double w = Math.Round(bounds.SizeX, 1);
+            double h = Math.Round(bounds.SizeY, 1);
+            double d = Math.Round(bounds.SizeZ, 1);
+
+            string lblW = Application.Current.TryFindResource("MsgDimLarghezza") as string ?? "Larghezza";
+            string lblH = Application.Current.TryFindResource("MsgDimAltezza") as string ?? "Altezza";
+            string lblD = Application.Current.TryFindResource("MsgDimProfondita") as string ?? "Profondità";
+            string titolo = Application.Current.TryFindResource("MsgDimensioniTitolo") as string ?? "Dimensioni Oggetto";
+
+            string msg = $"{pezzoSelezionato.Name}\n\n" +
+                         $"{lblW}:   {w} px\n" +
+                         $"{lblH}:     {h} px\n" +
+                         $"{lblD}:  {d} px";
+
+            MessageBox.Show(msg, titolo, MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void PopolaTextboxLuci()
+        {
+            isUpdatingLuci = true;
+            txtLuce1X.Text = impostazioniLuci.Dir1X.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+            txtLuce1Y.Text = impostazioniLuci.Dir1Y.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+            txtLuce1Z.Text = impostazioniLuci.Dir1Z.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+            txtLuce2X.Text = impostazioniLuci.Dir2X.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+            txtLuce2Y.Text = impostazioniLuci.Dir2Y.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+            txtLuce2Z.Text = impostazioniLuci.Dir2Z.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+            rectLuce1Colore.Background = new SolidColorBrush(impostazioniLuci.Diffuse1);
+            rectLuce2Colore.Background = new SolidColorBrush(impostazioniLuci.Diffuse2);
+            isUpdatingLuci = false;
+        }
+
+        private void RectLuceColore_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (string.IsNullOrEmpty(cartellaAttuale)) return;
+
+            bool isLuce1 = sender == rectLuce1Colore;
+            Color coloreBase = isLuce1 ? impostazioniLuci.Diffuse1 : impostazioniLuci.Diffuse2;
+
+            FlatColorPicker cp = new FlatColorPicker(coloreBase);
+            cp.Owner = this;
+
+            if (cp.ShowDialog() == true)
+            {
+                if (isLuce1)
+                {
+                    impostazioniLuci.Diffuse1 = cp.FinalColor;
+                    rectLuce1Colore.Background = new SolidColorBrush(cp.FinalColor);
+                }
+                else
+                {
+                    impostazioniLuci.Diffuse2 = cp.FinalColor;
+                    rectLuce2Colore.Background = new SolidColorBrush(cp.FinalColor);
+                }
+                XmlHelper.RicostruisciLuci(impostazioniLuci, luciGroup);
+                btnSalva.IsEnabled = true;
+            }
+        }
+
+        private void TxtLuci_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (isUpdatingLuci || string.IsNullOrEmpty(cartellaAttuale)) return;
+
+            bool changed = false;
+            if (double.TryParse(txtLuce1X.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double x1)) { impostazioniLuci.Dir1X = x1; changed = true; }
+            if (double.TryParse(txtLuce1Y.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double y1)) { impostazioniLuci.Dir1Y = y1; changed = true; }
+            if (double.TryParse(txtLuce1Z.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double z1)) { impostazioniLuci.Dir1Z = z1; changed = true; }
+            if (double.TryParse(txtLuce2X.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double x2)) { impostazioniLuci.Dir2X = x2; changed = true; }
+            if (double.TryParse(txtLuce2Y.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double y2)) { impostazioniLuci.Dir2Y = y2; changed = true; }
+            if (double.TryParse(txtLuce2Z.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double z2)) { impostazioniLuci.Dir2Z = z2; changed = true; }
+
+            if (changed)
+            {
+                XmlHelper.RicostruisciLuci(impostazioniLuci, luciGroup);
+                btnSalva.IsEnabled = true;
+            }
         }
 
         private void Zoom_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -748,8 +836,7 @@ namespace Creazione_griglie
                 string texPath = pezzoSelezionato.RemoveTexture ? "" : (string.IsNullOrEmpty(pezzoSelezionato.NewTexturePath) ? pezzoSelezionato.TextureName : pezzoSelezionato.NewTexturePath);
                 if (!string.IsNullOrEmpty(texPath))
                 {
-                    string pathTrovato = File.Exists(Path.Combine(cartellaAttuale, texPath)) ? Path.Combine(cartellaAttuale, texPath) :
-                        (File.Exists(Path.Combine(cartellaPadre, texPath)) ? Path.Combine(cartellaPadre, texPath) : null);
+                    string pathTrovato = MeshHelper.TrovaPercorsoTextura(cartellaAttuale, cartellaPadre, texPath);
                     if (pathTrovato != null)
                     {
                         startDiffuse = MeshHelper.EstraiColoreDaImmagine(pathTrovato);
@@ -807,7 +894,7 @@ namespace Creazione_griglie
                 {
                     m.NewTexturePath = ofd.FileName;
                     m.RemoveTexture = false;
-                    m.TextureRotation = 180;
+                    m.TextureRotation = 0;
 
                     m.OriginalMaterial = MeshHelper.CreaMaterialeWPF(m, cartellaAttuale, cartellaPadre);
                     if (m.Model3D != null)
@@ -956,7 +1043,7 @@ namespace Creazione_griglie
                 try { Directory.CreateDirectory(cartellaDest); }
                 catch (UnauthorizedAccessException)
                 {
-                    MessageBox.Show("Errore permessi. Avvia come Amministratore. / Access Denied.",
+                    MessageBox.Show(Application.Current.TryFindResource("MsgErrorePermessi") as string ?? "Errore permessi. Avvia come Amministratore.",
                                     Application.Current.TryFindResource("MsgErrore") as string ?? "Errore",
                                     MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
@@ -996,9 +1083,20 @@ namespace Creazione_griglie
                     List<MeshData> tuttiIFileX = new List<MeshData>();
                     MeshHelper.EstraiTuttiIFileX(alberoGerarchico[0], tuttiIFileX);
 
+                    Directory.CreateDirectory(cartellaDestinazione);
+
+                    // Nomi immagine da conservare: icon + tutte le skin attive
+                    var immaginiConservate = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "icon.jpg" };
+
                     foreach (var fileRoot in tuttiIFileX)
                     {
                         if (string.IsNullOrEmpty(fileRoot.OriginalXFileContent)) continue;
+
+                        // La texture va nella stessa sottocartella del file .x che la usa
+                        string sottoCartella = Path.GetDirectoryName(fileRoot.OriginalFileName) ?? "";
+                        string cartellaTexDest = string.IsNullOrEmpty(sottoCartella)
+                            ? cartellaDestinazione
+                            : Path.Combine(cartellaDestinazione, sottoCartella);
 
                         List<MeshData> tuttiNodiFile = new List<MeshData>();
                         MeshHelper.AppiattisciGerarchia(fileRoot.Children, tuttiNodiFile);
@@ -1006,35 +1104,49 @@ namespace Creazione_griglie
                         foreach (var m in tuttiNodiFile)
                         {
                             if (m.IsGroup || m.RemoveTexture) continue;
-                            string pathSorgente = !string.IsNullOrEmpty(m.NewTexturePath) ? m.NewTexturePath : m.TextureName;
 
-                            if (!string.IsNullOrEmpty(pathSorgente))
+                            // Nome finale della texture nel file .x (dopo eventuale sostituzione utente)
+                            string nomeTex = !string.IsNullOrEmpty(m.NewTexturePath)
+                                ? Path.GetFileName(m.NewTexturePath)
+                                : Path.GetFileName(m.TextureName ?? "");
+                            if (string.IsNullOrEmpty(nomeTex)) continue;
+
+                            immaginiConservate.Add(nomeTex);
+
+                            // Sorgente: percorso assoluto della nuova texture oppure cerca nello stile origine
+                            string fullSorgente = !string.IsNullOrEmpty(m.NewTexturePath) && File.Exists(m.NewTexturePath)
+                                ? m.NewTexturePath
+                                : MeshHelper.TrovaPercorsoTextura(cartellaAttuale, cartellaPadre, m.TextureName);
+
+                            if (fullSorgente != null)
                             {
-                                string fullSorgente = Path.IsPathRooted(pathSorgente) ? pathSorgente :
-                                    (File.Exists(Path.Combine(cartellaAttuale, pathSorgente)) ? Path.Combine(cartellaAttuale, pathSorgente) : Path.Combine(cartellaPadre, pathSorgente));
-
-                                if (File.Exists(fullSorgente))
-                                {
-                                    string pathFinale = Path.Combine(cartellaDestinazione, Path.GetFileName(pathSorgente));
-                                    Directory.CreateDirectory(Path.GetDirectoryName(pathFinale));
-                                    MeshHelper.SalvaTextureFisicamente(fullSorgente, pathFinale, m.TextureRotation);
-                                }
+                                Directory.CreateDirectory(cartellaTexDest);
+                                string pathFinale = Path.Combine(cartellaTexDest, nomeTex);
+                                MeshHelper.SalvaTextureFisicamente(fullSorgente, pathFinale, 0);
                             }
                         }
 
                         string fullDestPath = Path.Combine(cartellaDestinazione, fileRoot.OriginalFileName);
                         Directory.CreateDirectory(Path.GetDirectoryName(fullDestPath));
-
                         string nuovoTestoX = XFileEngine.ApplicaSalvataggio(fileRoot.OriginalXFileContent, tuttiNodiFile);
                         File.WriteAllText(fullDestPath, nuovoTestoX);
                     }
 
                     if (viewPortMassimizzato.Background is SolidColorBrush bgBrush)
-                    {
                         SalvaSfondoInXML(bgBrush.Color, cartellaDestinazione);
-                    }
+
+                    XmlHelper.SalvaLuciInXML(impostazioniLuci, Path.Combine(cartellaDestinazione, "Lights.xml"));
 
                     ThumbnailGenerator.GeneraIcona(cartellaDestinazione, alberoGerarchico[0], cartellaAttuale, cartellaPadre);
+
+                    // Elimina tutte le immagini nella cartella destinazione non presenti nella lista attiva
+                    string[] estensioni = { ".png", ".jpg", ".jpeg", ".bmp" };
+                    foreach (string file in Directory.GetFiles(cartellaDestinazione, "*", SearchOption.AllDirectories))
+                    {
+                        if (!estensioni.Contains(Path.GetExtension(file).ToLower())) continue;
+                        if (!immaginiConservate.Contains(Path.GetFileName(file)))
+                            File.Delete(file);
+                    }
                 }
                 return true;
             }

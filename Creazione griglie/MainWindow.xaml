@@ -95,14 +95,6 @@
                             <TextBlock Text="{DynamicResource StrAnnulla}" VerticalAlignment="Center" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Button>
-
-                    <Button Click="BtnHome_Click" Style="{StaticResource BaseCardButtonStyle}" Padding="15,8" Foreground="{DynamicResource TestoPrincipale}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="{StaticResource IconDataRestore}" Fill="{DynamicResource TestoPrincipale}" Stretch="Uniform" Margin="0,0,8,0" Width="16" Height="16"/>
-                            <TextBlock Text="{DynamicResource StrRipristina}" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                        </StackPanel>
-                    </Button>
-
                 </StackPanel>
             </Border>
 
@@ -272,7 +264,19 @@
                                 </ModelVisual3D>
                             </helix:HelixViewport3D>
 
-                            <Button Content="{DynamicResource StrTornaGalleria}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15" Padding="15,8" Click="BtnTornaGalleria_Click" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgCard}" Foreground="White"/>
+                            <Button HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15" Padding="15,8" Click="BtnTornaGalleria_Click" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgCard}" Foreground="White">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconDataArrowLeft}" Fill="White" Stretch="Uniform" Margin="0,0,8,0" Width="16" Height="16"/>
+                                    <TextBlock Text="{DynamicResource StrTornaGalleria}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button Click="BtnHome_Click" Style="{StaticResource BaseCardButtonStyle}" Padding="15,8" Foreground="{DynamicResource TestoPrincipale}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="15,15,15,15" Cursor="Hand">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconDataHome}" Fill="{DynamicResource TestoPrincipale}" Stretch="Uniform" Margin="0,0,8,0" Width="16" Height="16"/>
+                                    <TextBlock Text="{DynamicResource StrRipristina}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
                         </Grid>
 
                     </Grid>
@@ -289,9 +293,52 @@
                             </StackPanel>
                         </Border>
 
+                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8" Margin="15,0,15,8">
+                            <StackPanel Margin="5">
+                                <TextBlock Text="{DynamicResource StrLuci}" Foreground="{DynamicResource TestoSecondario}" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="28"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="26"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="X" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="11"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Y" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="11"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="Z" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="11"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource StrLuce1}" Foreground="{DynamicResource TestoPrincipale}" VerticalAlignment="Center" FontSize="11" Margin="0,2,4,2"/>
+                                    <TextBox x:Name="txtLuce1X" Grid.Row="1" Grid.Column="1" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
+                                    <TextBox x:Name="txtLuce1Y" Grid.Row="1" Grid.Column="2" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
+                                    <TextBox x:Name="txtLuce1Z" Grid.Row="1" Grid.Column="3" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
+                                    <Border x:Name="rectLuce1Colore" Grid.Row="1" Grid.Column="4" Width="20" Height="20" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" HorizontalAlignment="Center" VerticalAlignment="Center" MouseLeftButtonDown="RectLuceColore_Click"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource StrLuce2}" Foreground="{DynamicResource TestoPrincipale}" VerticalAlignment="Center" FontSize="11" Margin="0,2,4,2"/>
+                                    <TextBox x:Name="txtLuce2X" Grid.Row="2" Grid.Column="1" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
+                                    <TextBox x:Name="txtLuce2Y" Grid.Row="2" Grid.Column="2" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
+                                    <TextBox x:Name="txtLuce2Z" Grid.Row="2" Grid.Column="3" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
+                                    <Border x:Name="rectLuce2Colore" Grid.Row="2" Grid.Column="4" Width="20" Height="20" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" HorizontalAlignment="Center" VerticalAlignment="Center" MouseLeftButtonDown="RectLuceColore_Click"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel x:Name="pannelloProprieta" Margin="15,15,15,0" IsEnabled="False">
                             <TextBlock Text="{DynamicResource StrProprieta}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TestoPrincipale}" Margin="0,0,0,5" TextAlignment="Center"/>
-                            <TextBlock x:Name="txtNomeSelezionato" Text="{DynamicResource StrNessunaSelezione}" Foreground="{DynamicResource ColorePrimario}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,20" TextAlignment="Center"/>
+                            <TextBlock x:Name="txtNomeSelezionato" Text="{DynamicResource StrNessunaSelezione}" Foreground="{DynamicResource ColorePrimario}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,10" TextAlignment="Center"/>
+
+                            <Button x:Name="btnInfoOggetto" Visibility="Collapsed" Style="{StaticResource BaseCardButtonStyle}"
+                                    Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}"
+                                    Padding="10,6" Margin="0,0,0,15" Click="BtnInfoOggetto_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconDataInfo}" Fill="{DynamicResource TestoPrincipale}" Stretch="Uniform" Margin="0,0,8,0" Width="14" Height="14"/>
+                                    <TextBlock Text="{DynamicResource StrInfoOggetto}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
 
                             <CheckBox x:Name="chkApplicaATutti" Content="{DynamicResource StrApplicaTutti}" Style="{StaticResource ModernToggleStyle}" Margin="0,5,0,15" IsChecked="True" FontSize="14" Cursor="Hand"/>
 
@@ -337,6 +384,7 @@
 
                             <TextBlock x:Name="txtStatus" Margin="0,20" TextWrapping="Wrap" Foreground="{DynamicResource ColoreIngressi}" FontWeight="SemiBold" TextAlignment="Center"/>
                         </StackPanel>
+                        </ScrollViewer>
                     </DockPanel>
                 </Border>
             </Grid>

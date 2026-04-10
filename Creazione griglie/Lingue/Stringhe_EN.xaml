@@ -23,7 +23,7 @@
     <sys:String x:Key="StrPan">Move (Pan)</sys:String>
     <sys:String x:Key="StrZoom">Zoom</sys:String>
 
-    <sys:String x:Key="StrTornaGalleria">⬅ Back to Gallery</sys:String>
+    <sys:String x:Key="StrTornaGalleria">Back to Gallery</sys:String>
     <sys:String x:Key="StrIngrandisci">🔍 Modify</sys:String>
 
     <sys:String x:Key="StrProprieta">Object Properties</sys:String>
@@ -74,4 +74,19 @@
     <sys:String x:Key="MsgNuovoStile">The new style will be saved automatically. Do you want to proceed?</sys:String>
     <sys:String x:Key="MsgSelezionaPrima">Please select a style from the list first!</sys:String>
     <sys:String x:Key="MsgEliminaConferma">Are you sure you want to permanently delete the selected style? This cannot be undone.</sys:String>
+    <sys:String x:Key="MsgStileEliminato">Style successfully deleted.</sys:String>
+    <sys:String x:Key="MsgNessunStilePersonalizzato">No custom style found.&#x0a;First create a new style starting from a preset style.</sys:String>
+    <sys:String x:Key="MsgErroreCaricamento">Loading error: </sys:String>
+    <sys:String x:Key="MsgErrorePermessi">Access Denied. Run as Administrator.</sys:String>
+    <sys:String x:Key="MsgErroreRisorse">Resource extraction error: </sys:String>
+
+    <sys:String x:Key="StrInfoOggetto">Object Info</sys:String>
+    <sys:String x:Key="MsgDimensioniTitolo">Object Dimensions</sys:String>
+    <sys:String x:Key="MsgDimLarghezza">Width</sys:String>
+    <sys:String x:Key="MsgDimAltezza">Height</sys:String>
+    <sys:String x:Key="MsgDimProfondita">Depth</sys:String>
+
+    <sys:String x:Key="StrLuci">Light Direction</sys:String>
+    <sys:String x:Key="StrLuce1">L.1</sys:String>
+    <sys:String x:Key="StrLuce2">L.2</sys:String>
 </ResourceDictionary>

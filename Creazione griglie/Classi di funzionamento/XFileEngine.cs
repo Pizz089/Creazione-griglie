@@ -250,9 +250,6 @@ namespace Creazione_griglie
                                 double u = double.Parse(uvTokens[uvIndex++], NumberStyles.Any, CultureInfo.InvariantCulture);
                                 double v = double.Parse(uvTokens[uvIndex++], NumberStyles.Any, CultureInfo.InvariantCulture);
 
-                                // CONVERSIONE 3: Conversione dell'asse V (Verticale)
-                                // DirectX legge dall'alto (0) verso il basso (1)
-                                // WPF legge dal basso (0) verso l'alto (1)
                                 uvs.Add(new Point(u, v));
                             }
                         }

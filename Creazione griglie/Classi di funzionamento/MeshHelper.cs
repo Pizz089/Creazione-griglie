@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -73,6 +74,28 @@ namespace Creazione_griglie
             }
         }
 
+        // Cerca una texture: prima nelle sottocartelle (specifiche per gioco), poi nella root (fallback comune)
+        public static string TrovaPercorsoTextura(string cartellaAttuale, string cartellaPadre, string texPath)
+        {
+            if (string.IsNullOrEmpty(texPath)) return null;
+            string nomeFile = Path.GetFileName(texPath);
+
+            string CercaInCartella(string cartella)
+            {
+                if (!Directory.Exists(cartella)) return null;
+                // 1. sottocartelle prima
+                string inSub = Directory.GetDirectories(cartella)
+                    .SelectMany(d => Directory.GetFiles(d, nomeFile, SearchOption.AllDirectories))
+                    .FirstOrDefault();
+                if (inSub != null) return inSub;
+                // 2. poi root
+                string inRoot = Path.Combine(cartella, nomeFile);
+                return File.Exists(inRoot) ? inRoot : null;
+            }
+
+            return CercaInCartella(cartellaAttuale) ?? CercaInCartella(cartellaPadre);
+        }
+
         // Assemblo il materiale WPF per il rendering 3D, gestendo i percorsi delle immagini
         public static Material CreaMaterialeWPF(MeshData md, string cartellaAttuale, string cartellaPadre)
         {
@@ -82,8 +105,7 @@ namespace Creazione_griglie
 
             if (!string.IsNullOrEmpty(texPath))
             {
-                string fullPath = File.Exists(Path.Combine(cartellaAttuale, texPath)) ? Path.Combine(cartellaAttuale, texPath) :
-                                 (File.Exists(Path.Combine(cartellaPadre, texPath)) ? Path.Combine(cartellaPadre, texPath) : null);
+                string fullPath = TrovaPercorsoTextura(cartellaAttuale, cartellaPadre, texPath);
                 if (fullPath != null)
                 {
                     try
@@ -93,11 +115,9 @@ namespace Creazione_griglie
                         ib.ViewportUnits = BrushMappingMode.Absolute;
                         ib.Viewport = new Rect(0, 0, md.TextureScale, md.TextureScale);
                         ib.Opacity = md.Alpha;
-
-                        if (md.TextureRotation != 0)
-                        {
-                            ib.RelativeTransform = new RotateTransform(md.TextureRotation, 0.5, 0.5);
-                        }
+                        // Rotazione 180° applicata solo al display WPF per correggere l'inversione UV
+                        // del pipeline 3D. Il file texture su disco NON viene mai ruotato fisicamente.
+                        ib.RelativeTransform = new RotateTransform(180, 0.5, 0.5);
 
                         baseBrush = ib;
                     }

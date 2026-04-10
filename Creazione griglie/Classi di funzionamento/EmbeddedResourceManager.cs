@@ -100,7 +100,8 @@ namespace Creazione_griglie
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Errore estrazione risorse: " + ex.Message, "Errore",
+                MessageBox.Show((Application.Current.TryFindResource("MsgErroreRisorse") as string ?? "Errore estrazione risorse: ") + ex.Message,
+                    Application.Current.TryFindResource("MsgErrore") as string ?? "Errore",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

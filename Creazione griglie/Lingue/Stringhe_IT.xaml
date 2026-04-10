@@ -23,7 +23,7 @@
     <sys:String x:Key="StrPan">Sposta (Pan)</sys:String>
     <sys:String x:Key="StrZoom">Zoom</sys:String>
 
-    <sys:String x:Key="StrTornaGalleria">⬅ Torna alla Galleria</sys:String>
+    <sys:String x:Key="StrTornaGalleria">Torna alla Galleria</sys:String>
     <sys:String x:Key="StrIngrandisci">🔍 Modifica</sys:String>
 
     <sys:String x:Key="StrProprieta">Proprietà Oggetto</sys:String>
@@ -74,4 +74,19 @@
     <sys:String x:Key="MsgNuovoStile">Il nuovo stile verrà salvato automaticamente. Vuoi procedere?</sys:String>
     <sys:String x:Key="MsgSelezionaPrima">Seleziona prima uno stile dalla lista!</sys:String>
     <sys:String x:Key="MsgEliminaConferma">Sei sicuro di voler eliminare definitivamente lo stile selezionato? L'operazione non è reversibile.</sys:String>
+    <sys:String x:Key="MsgStileEliminato">Stile eliminato con successo.</sys:String>
+    <sys:String x:Key="MsgNessunStilePersonalizzato">Nessuno stile personalizzato trovato.&#x0a;Crea prima un nuovo stile partendo da uno stile predefinito.</sys:String>
+    <sys:String x:Key="MsgErroreCaricamento">Errore caricamento: </sys:String>
+    <sys:String x:Key="MsgErrorePermessi">Errore permessi. Avvia come Amministratore.</sys:String>
+    <sys:String x:Key="MsgErroreRisorse">Errore estrazione risorse: </sys:String>
+
+    <sys:String x:Key="StrInfoOggetto">Info Oggetto</sys:String>
+    <sys:String x:Key="MsgDimensioniTitolo">Dimensioni Oggetto</sys:String>
+    <sys:String x:Key="MsgDimLarghezza">Larghezza</sys:String>
+    <sys:String x:Key="MsgDimAltezza">Altezza</sys:String>
+    <sys:String x:Key="MsgDimProfondita">Profondità</sys:String>
+
+    <sys:String x:Key="StrLuci">Direzione Luci</sys:String>
+    <sys:String x:Key="StrLuce1">L.1</sys:String>
+    <sys:String x:Key="StrLuce2">L.2</sys:String>
 </ResourceDictionary>
