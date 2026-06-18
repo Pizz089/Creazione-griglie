@@ -3,7 +3,19 @@
     "allow": [
       "Bash(dir \"%TEMP%\\\\CreazioneGriglie_Resources\\\\BaseStyles\")",
       "Bash(dir \"%TEMP%\\\\CreazioneGriglie_Resources\")",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(grep -l \"//\" \"Creazione griglie/BaseStyles/style#1/p10/\"*.x)",
+      "Bash(xargs ls -lat)",
+      "Read(//c/Program Files \\(x86\\)/Steltronic/**)",
+      "Read(//c/Users/dario.STELNET/**)",
+      "Read(///10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/**)",
+      "Read(///10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#20/**)",
+      "Read(///10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#20/p10/**)",
+      "Read(///10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#16/p10/**)",
+      "Read(///10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#1/p10/**)",
+      "Bash(xxd \"//10.11.1.1/c\\\\$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#20/p10/player.x\")",
+      "Bash(xxd \"//10.11.1.1/c\\\\$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#1/p10/player.X\")",
+      "Read(///10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#2/p10/**)"
     ]
   }
 }

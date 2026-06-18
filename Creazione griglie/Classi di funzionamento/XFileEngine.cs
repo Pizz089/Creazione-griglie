@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Windows.Media.Media3D;
@@ -77,15 +79,16 @@ namespace Creazione_griglie
                 if (double.TryParse(t, NumberStyles.Any, CultureInfo.InvariantCulture, out double val)) num.Add(val);
             }
 
+            // Uso Math.Round per evitare la perdita di precisione del cast a byte (es. 0.498039 * 255 = 126.999 truncato a 126 invece di 127)
             if (num.Count >= 4)
             {
                 def.Alpha = num[3];
-                def.DiffuseColor = Color.FromArgb((byte)(num[3] * 255), (byte)(num[0] * 255), (byte)(num[1] * 255), (byte)(num[2] * 255));
+                def.DiffuseColor = Color.FromArgb((byte)Math.Round(num[3] * 255), (byte)Math.Round(num[0] * 255), (byte)Math.Round(num[1] * 255), (byte)Math.Round(num[2] * 255));
                 def.HasColor = true;
             }
             if (num.Count >= 5) def.Power = num[4];
-            if (num.Count >= 8) def.Specular = Color.FromRgb((byte)(num[5] * 255), (byte)(num[6] * 255), (byte)(num[7] * 255));
-            if (num.Count >= 11) def.Emissive = Color.FromRgb((byte)(num[8] * 255), (byte)(num[9] * 255), (byte)(num[10] * 255));
+            if (num.Count >= 8) def.Specular = Color.FromRgb((byte)Math.Round(num[5] * 255), (byte)Math.Round(num[6] * 255), (byte)Math.Round(num[7] * 255));
+            if (num.Count >= 11) def.Emissive = Color.FromRgb((byte)Math.Round(num[8] * 255), (byte)Math.Round(num[9] * 255), (byte)Math.Round(num[10] * 255));
 
             return def;
         }
@@ -257,7 +260,10 @@ namespace Creazione_griglie
                 }
             }
 
-            while (uvs.Count > 0 && uvs.Count < posizioni.Count) uvs.Add(new Point(0, 0));
+            // Se il file salvato ha UV in numero diverso dai vertici (es. da un save precedente buggato), scartare:
+            // DirectX/WPF richiedono che TextureCoordinates.Count == Positions.Count, altrimenti crash al render.
+            // Trattando come "nessuna UV" l'utente puo' ri-applicare la skin per generare UV pulite.
+            if (uvs.Count != posizioni.Count) uvs.Clear();
 
             List<MaterialDef> meshMaterials = new List<MaterialDef>();
             List<int> faceMatIndices = new List<int>();
@@ -370,10 +376,12 @@ namespace Creazione_griglie
             return -1;
         }
 
-        public static string ApplicaSalvataggio(string testoOriginale, List<MeshData> allMeshesFlat)
+        // Restituisce il testo modificato e, in `diagnostica`, info su quante sostituzioni sono andate a segno.
+        public static string ApplicaSalvataggio(string testoOriginale, List<MeshData> allMeshesFlat, out string diagnostica)
         {
             string testoModificato = testoOriginale;
             HashSet<string> elaborati = new HashSet<string>();
+            int matSostituiti = 0, matFalliti = 0;
 
             foreach (var mesh in allMeshesFlat)
             {
@@ -399,11 +407,314 @@ namespace Creazione_griglie
                                     $"  {(mesh.Emissive.R / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.Emissive.G / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.Emissive.B / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};;\r\n" +
                                     $"{texBlock}";
 
-                testoModificato = testoModificato.Replace(mesh.OriginalMaterialContent, newContent);
+                if (testoModificato.Contains(mesh.OriginalMaterialContent))
+                {
+                    testoModificato = testoModificato.Replace(mesh.OriginalMaterialContent, newContent);
+                    matSostituiti++;
+                }
+                else
+                {
+                    matFalliti++;
+                }
                 elaborati.Add(mesh.OriginalMaterialContent);
             }
 
+            // Riscrivo i blocchi MeshTextureCoords per persistere la proiezione planare e gli offset locali/zoom.
+            // Wrap in try-catch perche' se la riscrittura UV ha un bug non vogliamo perdere il salvataggio del materiale.
+            int uvScritti = 0;
+            string testoConUV = testoModificato;
+            try
+            {
+                testoConUV = AggiornaMeshTextureCoords(testoModificato, allMeshesFlat, out uvScritti);
+                // Safety check fondamentale: ogni MeshTextureCoords nel testo finale DEVE avere conteggio UV
+                // uguale al conteggio vertici della Mesh che lo contiene. Se anche solo uno e' sballato,
+                // DirectX/WPF crashano al load -> ripiego sul testo originale del materiale.
+                if (ValidaConteggiMTC(testoConUV))
+                {
+                    testoModificato = testoConUV;
+                }
+                else
+                {
+                    uvScritti = -1; // marcatore per diagnostica: validazione fallita, ripiegato
+                }
+            }
+            catch (Exception ex)
+            {
+                uvScritti = -2;
+                diagnostica = $"ERRORE riscrittura UV: {ex.Message}";
+            }
+
+            diagnostica = $"materiali sostituiti: {matSostituiti}, falliti: {matFalliti}, blocchi UV riscritti: {uvScritti} (-1=anomalia ripiegato, -2=eccezione)";
             return testoModificato;
+        }
+
+        private static int ContaOccorrenze(string testo, string pattern)
+        {
+            int count = 0;
+            int pos = 0;
+            while ((pos = testo.IndexOf(pattern, pos)) != -1)
+            {
+                count++;
+                pos += pattern.Length;
+            }
+            return count;
+        }
+
+        // Compatibilita' con il chiamante senza diagnostica
+        public static string ApplicaSalvataggio(string testoOriginale, List<MeshData> allMeshesFlat)
+        {
+            return ApplicaSalvataggio(testoOriginale, allMeshesFlat, out _);
+        }
+
+        // Calcola le UV "bakate": applica il moltiplicatore di zoom (TextureScale) e l'offset locale (SkinOffsetU/V)
+        // direttamente nelle coordinate UV. Cosi' al reload il brush con Viewport=(0,0,1,1) riproduce lo stesso
+        // rendering ottenuto a edit time, sia in WPF che nel sw target (Steltronic Focus).
+        private static List<Point> CalcolaUVBakate(MeshData md)
+        {
+            var uvs = md.Geometry?.TextureCoordinates;
+            var result = new List<Point>();
+            if (uvs == null || uvs.Count == 0) return result;
+
+            // Bake solo se c'e' una skin utente attiva: TextureScale + SkinOffset entrano nel viewport del brush e
+            // devono essere portate dentro le UV per essere persistenti nel file .x.
+            bool hasSkin = !string.IsNullOrEmpty(md.NewTexturePath) && !md.RemoveTexture;
+            if (!hasSkin)
+            {
+                foreach (var uv in uvs) result.Add(uv);
+                return result;
+            }
+
+            double T = md.TextureScale > 0 ? md.TextureScale : 1.0;
+            double off = (1 - T) / 2;
+            double offU = md.SkinOffsetU;
+            double offV = md.SkinOffsetV;
+            foreach (var uv in uvs)
+            {
+                // (uv - off - offset) / T = brush relative coord che il viewport user-skin produce a runtime.
+                // Salvo questo valore direttamente: al reload Viewport=(0,0,1,1) usa la UV come brush rel = stessa immagine.
+                double u_rel = (uv.X - off - offU) / T;
+                double v_rel = (uv.Y - off - offV) / T;
+                result.Add(new Point(u_rel, v_rel));
+            }
+            return result;
+        }
+
+        // Iterazione sui Mesh block (saltando le definizioni template): per ogni Mesh block reale,
+        // se al suo interno c'e' gia' un MeshTextureCoords lo sostituisce, altrimenti lo INSERISCE prima del }.
+        // L'inserimento e' necessario perche' molti .x originali (Steltronic player.X ecc.) non hanno MeshTextureCoords:
+        // le UV erano implicite o non usate. Senza il blocco a load WPF non ha mapping UV e la skin non si vede.
+        // Il matching delle MeshData ai Mesh block avviene per CONTEGGIO VERTICI per evitare mismatch quando l'utente
+        // ha skinnato solo alcuni elementi (i sibling sono adiacenti con stesso Positions.Count).
+        private static string AggiornaMeshTextureCoords(string testo, List<MeshData> meshes, out int blocchiScritti)
+        {
+            blocchiScritti = 0;
+            if (meshes == null || meshes.Count == 0) return testo;
+
+            // Lista delle MeshData con UV proiettate disponibili (solo quelle effettivamente skinnate)
+            var disponibili = meshes
+                .Where(m => m?.Geometry?.TextureCoordinates != null
+                         && m.Geometry.TextureCoordinates.Count > 0
+                         && m.Geometry.Positions != null
+                         && m.Geometry.Positions.Count == m.Geometry.TextureCoordinates.Count)
+                .ToList();
+            if (disponibili.Count == 0) return testo;
+
+            // Indice di consumo per ogni conteggio vertici: i sibling con stesso count condividono le UV,
+            // quindi posso usare lo stesso MeshData per piu' Mesh block con quel vertex count consecutivi.
+            var usati = new HashSet<MeshData>();
+
+            var regexMesh = new Regex(@"\bMesh\b\s+\w*\s*\{", RegexOptions.Compiled);
+            var risultato = new StringBuilder();
+            int pos = 0;
+
+            while (pos < testo.Length)
+            {
+                var match = regexMesh.Match(testo, pos);
+                if (!match.Success)
+                {
+                    risultato.Append(testo, pos, testo.Length - pos);
+                    break;
+                }
+
+                int meshKeywordStart = match.Index;
+                int openBrace = testo.IndexOf('{', meshKeywordStart);
+                if (openBrace == -1) { risultato.Append(testo, pos, testo.Length - pos); break; }
+                int closeBrace = TrovaFineBlocco(testo, openBrace);
+                if (closeBrace == -1) { risultato.Append(testo, pos, testo.Length - pos); break; }
+
+                if (PrecedutoDaTemplate(testo, meshKeywordStart))
+                {
+                    // E' "template Mesh { ... }" in cima al file: lascio intatto e proseguo
+                    risultato.Append(testo, pos, closeBrace + 1 - pos);
+                    pos = closeBrace + 1;
+                    continue;
+                }
+
+                // Leggo il conteggio vertici di questo Mesh block: e' il primo intero dopo la {
+                int vertCount = LeggiPrimoIntero(testo, openBrace + 1, closeBrace);
+
+                // Cerco una MeshData skinnata con conteggio combaciante. Quando ne trovo una, marco
+                // come usati TUTTI i suoi sibling (stesso Mesh block sorgente, multi-material), riconoscibili
+                // perche' condividono la stessa Positions[0]. Senza questo, Mesh block successivi finiscono
+                // per matchare sibling di mesh gia' usate -> UV duplicate fra mesh diverse.
+                MeshData md = disponibili.FirstOrDefault(m => !usati.Contains(m) && m.Geometry.Positions.Count == vertCount);
+                if (md != null)
+                {
+                    Point3D firstPos = md.Geometry.Positions[0];
+                    foreach (var sibling in disponibili)
+                    {
+                        if (sibling.Geometry.Positions.Count == vertCount && sibling.Geometry.Positions[0] == firstPos)
+                            usati.Add(sibling);
+                    }
+                }
+
+                // Cerco un MeshTextureCoords reale dentro questo Mesh block
+                int uvKeyword = -1, uvOpen = -1, uvClose = -1;
+                int scanFrom = openBrace + 1;
+                while (scanFrom < closeBrace)
+                {
+                    int idx = testo.IndexOf("MeshTextureCoords", scanFrom);
+                    if (idx == -1 || idx >= closeBrace) break;
+                    if (!PrecedutoDaTemplate(testo, idx))
+                    {
+                        uvKeyword = idx;
+                        uvOpen = testo.IndexOf('{', idx);
+                        if (uvOpen != -1 && uvOpen < closeBrace) uvClose = TrovaFineBlocco(testo, uvOpen);
+                        break;
+                    }
+                    scanFrom = idx + 1;
+                }
+
+                // Verifica se l'esistente MTC ha conteggio valido rispetto ai vertici della mesh
+                bool mtcEsistente = uvKeyword >= 0 && uvOpen >= 0 && uvClose >= 0 && uvClose < closeBrace;
+                bool mtcEsistenteInvalido = false;
+                if (mtcEsistente)
+                {
+                    int existingUvCount = LeggiPrimoIntero(testo, uvOpen + 1, uvClose);
+                    if (existingUvCount != vertCount) mtcEsistenteInvalido = true;
+                }
+
+                if (md != null && mtcEsistente)
+                {
+                    // Sostituisco il contenuto del MeshTextureCoords esistente con quello giusto
+                    risultato.Append(testo, pos, uvOpen + 1 - pos);
+                    risultato.Append(BuildContenutoUV(CalcolaUVBakate(md)));
+                    risultato.Append('}');
+                    risultato.Append(testo, uvClose + 1, closeBrace + 1 - uvClose - 1);
+                    blocchiScritti++;
+                }
+                else if (md != null)
+                {
+                    // Inserisco un nuovo MeshTextureCoords subito prima della } della Mesh
+                    risultato.Append(testo, pos, closeBrace - pos);
+                    risultato.Append("\r\n MeshTextureCoords {");
+                    risultato.Append(BuildContenutoUV(CalcolaUVBakate(md)));
+                    risultato.Append("}\r\n");
+                    risultato.Append('}');
+                    blocchiScritti++;
+                }
+                else if (mtcEsistenteInvalido)
+                {
+                    // Nessuna MeshData utile MA c'e' un MTC esistente con count sbagliato (probabile residuo
+                    // di un save precedente buggato). Lo rimuovo per evitare crash al load.
+                    risultato.Append(testo, pos, uvKeyword - pos);
+                    risultato.Append(testo, uvClose + 1, closeBrace + 1 - uvClose - 1);
+                    blocchiScritti++;
+                }
+                else
+                {
+                    // Nessuna MeshData per questo Mesh block e MTC esistente valido o assente: lascio com'e'
+                    risultato.Append(testo, pos, closeBrace + 1 - pos);
+                }
+
+                pos = closeBrace + 1;
+            }
+
+            return risultato.ToString();
+        }
+
+        // Verifica che tutti i blocchi MeshTextureCoords nel testo abbiano conteggio UV uguale al conteggio vertici
+        // del Mesh block che li contiene. Usato come safety check dopo AggiornaMeshTextureCoords.
+        private static bool ValidaConteggiMTC(string testo)
+        {
+            var regexMesh = new Regex(@"\bMesh\b\s+\w*\s*\{", RegexOptions.Compiled);
+            int pos = 0;
+            while (pos < testo.Length)
+            {
+                var m = regexMesh.Match(testo, pos);
+                if (!m.Success) break;
+
+                int meshKeywordStart = m.Index;
+                int openBrace = testo.IndexOf('{', meshKeywordStart);
+                if (openBrace == -1) break;
+                int closeBrace = TrovaFineBlocco(testo, openBrace);
+                if (closeBrace == -1) return false;
+
+                if (PrecedutoDaTemplate(testo, meshKeywordStart))
+                {
+                    pos = closeBrace + 1;
+                    continue;
+                }
+
+                int vertCount = LeggiPrimoIntero(testo, openBrace + 1, closeBrace);
+
+                int scanFrom = openBrace + 1;
+                while (scanFrom < closeBrace)
+                {
+                    int idx = testo.IndexOf("MeshTextureCoords", scanFrom);
+                    if (idx == -1 || idx >= closeBrace) break;
+                    if (PrecedutoDaTemplate(testo, idx)) { scanFrom = idx + 1; continue; }
+
+                    int uvOpen = testo.IndexOf('{', idx);
+                    if (uvOpen == -1 || uvOpen >= closeBrace) break;
+                    int uvClose = TrovaFineBlocco(testo, uvOpen);
+                    if (uvClose == -1 || uvClose >= closeBrace) return false;
+
+                    int uvCount = LeggiPrimoIntero(testo, uvOpen + 1, uvClose);
+                    if (uvCount != vertCount) return false;
+
+                    scanFrom = uvClose + 1;
+                }
+                pos = closeBrace + 1;
+            }
+            return true;
+        }
+
+        // Verifica se la keyword a indice `idx` e' preceduta dalla parola "template" (con whitespace tra le due)
+        private static bool PrecedutoDaTemplate(string testo, int idx)
+        {
+            int prevNonWs = idx - 1;
+            while (prevNonWs > 0 && (testo[prevNonWs] == ' ' || testo[prevNonWs] == '\t' || testo[prevNonWs] == '\r' || testo[prevNonWs] == '\n')) prevNonWs--;
+            return prevNonWs >= 7 && testo.Substring(prevNonWs - 7, 8) == "template";
+        }
+
+        // Legge il primo intero (saltando whitespace e punteggiatura) nell'intervallo [start, end).
+        // Usato per estrarre il conteggio vertici dal Mesh block (e' il primo numero dopo la "{").
+        private static int LeggiPrimoIntero(string testo, int start, int end)
+        {
+            while (start < end && !char.IsDigit(testo[start])) start++;
+            if (start >= end) return -1;
+            int e = start;
+            while (e < end && char.IsDigit(testo[e])) e++;
+            return int.TryParse(testo.Substring(start, e - start), out int v) ? v : -1;
+        }
+
+        private static string BuildContenutoUV(List<Point> uvs)
+        {
+            var sb = new StringBuilder();
+            sb.Append("\r\n ");
+            sb.Append(uvs.Count.ToString(CultureInfo.InvariantCulture));
+            sb.Append(";\r\n");
+            for (int i = 0; i < uvs.Count; i++)
+            {
+                sb.Append(uvs[i].X.ToString("0.000000", CultureInfo.InvariantCulture));
+                sb.Append(';');
+                sb.Append(uvs[i].Y.ToString("0.000000", CultureInfo.InvariantCulture));
+                sb.Append(';');
+                sb.Append(i == uvs.Count - 1 ? ";" : ",");
+                sb.Append("\r\n");
+            }
+            return sb.ToString();
         }
     }
 }

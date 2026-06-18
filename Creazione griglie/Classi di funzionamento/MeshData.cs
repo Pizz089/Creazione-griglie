@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows.Media;
 using System.Windows.Media.Media3D;
 
 // Forzo le classi WPF per evitare conflitti con la libreria di disegno
@@ -33,8 +34,21 @@ namespace Creazione_griglie
         public string NewTexturePath { get; set; } = "";
         public bool RemoveTexture { get; set; } = false;
 
+        // Backup delle UV originali del file .x prima della proiezione planare per la skin utente.
+        // Null = nessuna proiezione attiva (UV originali in uso). Ripristinato alla rimozione skin.
+        public PointCollection OriginalTextureCoordinates { get; set; }
+
         public double TextureScale { get; set; } = 1.0;
         public double TextureRotation { get; set; } = 0;
+
+        // Offset locale in spazio UV (-1..1): sposta la skin sulla superficie proiettata.
+        public double SkinOffsetU { get; set; } = 0;
+        public double SkinOffsetV { get; set; } = 0;
+
+        // Offset globale in spazio mondo: sposta l'origine 3D della proiezione planare.
+        public double SkinOffsetX { get; set; } = 0;
+        public double SkinOffsetY { get; set; } = 0;
+        public double SkinOffsetZ { get; set; } = 0;
 
         // Coordinate spaziali estratte dinamicamente dall'XML dello Stile
         private double _posX = 0, _posY = 0, _posZ = 0;

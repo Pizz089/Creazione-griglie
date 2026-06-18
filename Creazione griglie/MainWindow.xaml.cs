@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -44,6 +45,13 @@ namespace Creazione_griglie
         public string NewTexturePath { get; private set; }
         public double TextureScale { get; private set; }
         public double TextureRotation { get; private set; }
+        public double SkinOffsetU { get; private set; }
+        public double SkinOffsetV { get; private set; }
+        public double SkinOffsetX { get; private set; }
+        public double SkinOffsetY { get; private set; }
+        public double SkinOffsetZ { get; private set; }
+        public System.Windows.Media.PointCollection TextureCoordinates { get; private set; }
+        public System.Windows.Media.PointCollection OriginalTextureCoordinates { get; private set; }
 
         public MementoState(MeshData target)
         {
@@ -58,6 +66,16 @@ namespace Creazione_griglie
             NewTexturePath = target.NewTexturePath;
             TextureScale = target.TextureScale;
             TextureRotation = target.TextureRotation;
+            SkinOffsetU = target.SkinOffsetU;
+            SkinOffsetV = target.SkinOffsetV;
+            SkinOffsetX = target.SkinOffsetX;
+            SkinOffsetY = target.SkinOffsetY;
+            SkinOffsetZ = target.SkinOffsetZ;
+            // Snapshot delle UV correnti e del backup per gestire correttamente l'undo della proiezione planare
+            if (target.Geometry?.TextureCoordinates != null)
+                TextureCoordinates = new System.Windows.Media.PointCollection(target.Geometry.TextureCoordinates);
+            if (target.OriginalTextureCoordinates != null)
+                OriginalTextureCoordinates = new System.Windows.Media.PointCollection(target.OriginalTextureCoordinates);
         }
 
         public void Restore(string cartellaAttuale, string cartellaPadre)
@@ -72,6 +90,16 @@ namespace Creazione_griglie
             Target.NewTexturePath = NewTexturePath;
             Target.TextureScale = TextureScale;
             Target.TextureRotation = TextureRotation;
+            Target.SkinOffsetU = SkinOffsetU;
+            Target.SkinOffsetV = SkinOffsetV;
+            Target.SkinOffsetX = SkinOffsetX;
+            Target.SkinOffsetY = SkinOffsetY;
+            Target.SkinOffsetZ = SkinOffsetZ;
+            if (TextureCoordinates != null && Target.Geometry != null)
+                Target.Geometry.TextureCoordinates = new System.Windows.Media.PointCollection(TextureCoordinates);
+            Target.OriginalTextureCoordinates = OriginalTextureCoordinates != null
+                ? new System.Windows.Media.PointCollection(OriginalTextureCoordinates)
+                : null;
 
             Target.OriginalMaterial = MeshHelper.CreaMaterialeWPF(Target, cartellaAttuale, cartellaPadre);
             if (Target.Model3D != null)
@@ -122,6 +150,10 @@ namespace Creazione_griglie
         private MeshData pezzoSelezionato;
         private MeshData fileAttivoVisibile = null;
         private bool isUpdatingZoom = false;
+        // Quando true, ogni operazione (skin/colore/zoom/offset) si applica a tutte le mesh della scena
+        // invece che alla sola selezione. Attivato da BtnSelezionaScena_Click, disattivato quando l'utente
+        // clicca un singolo elemento (TreeView o viewport) per tornare a selezione puntuale.
+        private bool modalitaScena = false;
         private bool isUpdatingLuci = false;
         private LightSettings impostazioniLuci = new LightSettings();
 
@@ -573,6 +605,18 @@ namespace Creazione_griglie
         {
             List<MeshData> targets = new List<MeshData>();
 
+            if (modalitaScena)
+            {
+                // Modalita' scena: bersaglio = mesh base (no testi, no t_*) della scena visibile
+                var sorgenti = fileAttivoVisibile != null
+                    ? new List<MeshData> { fileAttivoVisibile }
+                    : new List<MeshData>(alberoGerarchico);
+                var raccolte = new List<MeshData>();
+                foreach (var s in sorgenti) RaccoglaiMeshNonTesto(s, raccolte);
+                targets.AddRange(raccolte.Where(m => !MeshFaParteDiFileT(m)));
+                return targets;
+            }
+
             if (chkApplicaATutti.IsChecked == true && pezzoSelezionato != null)
             {
                 List<MeshData> tutti = new List<MeshData>();
@@ -610,6 +654,9 @@ namespace Creazione_griglie
             MeshData nuovoSelezionato = treeComponenti.SelectedItem as MeshData;
             if (nuovoSelezionato == null) return;
 
+            // Selezione puntuale: esco dalla modalita' scena
+            modalitaScena = false;
+
             if (nuovoSelezionato.IsGroup && string.IsNullOrEmpty(nuovoSelezionato.OriginalXFileContent))
             {
                 MostraGalleria(nuovoSelezionato);
@@ -644,6 +691,8 @@ namespace Creazione_griglie
                 {
                     if (m.Model3D == hit)
                     {
+                        // Selezione puntuale: esco dalla modalita' scena
+                        modalitaScena = false;
                         SvuotaSelezione();
                         m.IsSelected = true;
 
@@ -656,6 +705,8 @@ namespace Creazione_griglie
                     }
                 }
             }
+            // Click su area vuota del viewport: esco anche dalla modalita' scena
+            modalitaScena = false;
             SvuotaSelezione();
         }
 
@@ -664,20 +715,37 @@ namespace Creazione_griglie
             isUpdatingZoom = true;
             if (pezzoSelezionato != null)
             {
-                pannelloProprieta.IsEnabled = true;
-                txtNomeSelezionato.Text = pezzoSelezionato.Name;
+                pannelloSelezionePart1.IsEnabled = true;
+                pannelloSelezionePart2.IsEnabled = true;
+                if (modalitaScena)
+                {
+                    int n = TrovaElementiCoinvolti().Count;
+                    txtNomeSelezionato.Text = $"Scena intera ({n} elementi)";
+                }
+                else
+                {
+                    txtNomeSelezionato.Text = pezzoSelezionato.Name;
+                }
                 btnInfoOggetto.Visibility = Visibility.Visible;
                 rectColore.Background = new SolidColorBrush(pezzoSelezionato.MeshColor);
 
                 string labelNessuna = Application.Current.TryFindResource("StrNessuna") as string ?? "Nessuna";
                 txtTexturePath.Text = pezzoSelezionato.RemoveTexture ? labelNessuna : Path.GetFileName(pezzoSelezionato.TextureName);
 
+                // TextureScale è il moltiplicatore rispetto al bounding box UV: 1.0 = combacia esattamente
                 slZoomSkin.Value = pezzoSelezionato.TextureScale;
                 txtZoomSkin.Text = pezzoSelezionato.TextureScale.ToString("0.00");
+
+                txtOffsetU.Text = pezzoSelezionato.SkinOffsetU.ToString("0.00");
+                txtOffsetV.Text = pezzoSelezionato.SkinOffsetV.ToString("0.00");
+                txtOffsetX.Text = pezzoSelezionato.SkinOffsetX.ToString("0.00");
+                txtOffsetY.Text = pezzoSelezionato.SkinOffsetY.ToString("0.00");
+                txtOffsetZ.Text = pezzoSelezionato.SkinOffsetZ.ToString("0.00");
             }
             else
             {
-                pannelloProprieta.IsEnabled = false;
+                pannelloSelezionePart1.IsEnabled = false;
+                pannelloSelezionePart2.IsEnabled = false;
                 btnInfoOggetto.Visibility = Visibility.Collapsed;
                 txtNomeSelezionato.Text = Application.Current.TryFindResource("StrNessunaSelezione") as string ?? "Nessuna selezione";
             }
@@ -801,6 +869,7 @@ namespace Creazione_griglie
         {
             foreach (var m in TrovaElementiCoinvolti())
             {
+                // TextureScale è il moltiplicatore: 1.0 = immagine combacia col bounding box UV, >1 zoom in, <1 zoom out (tile)
                 m.TextureScale = valoreZoom;
                 m.OriginalMaterial = MeshHelper.CreaMaterialeWPF(m, cartellaAttuale, cartellaPadre);
 
@@ -818,9 +887,251 @@ namespace Creazione_griglie
 
             RegistraStatoUndo(TrovaElementiCoinvolti());
 
-            double maxU = 0;
-            foreach (var uv in pezzoSelezionato.Geometry.TextureCoordinates) if (uv.X > maxU) maxU = uv.X;
-            slZoomSkin.Value = maxU > 0 ? maxU : 1.0;
+            // Per le skin caricate dall'utente il viewport segue il bbox UV → 1.0 = fit perfetto.
+            // Per le texture originali del .x si usa il mapping legacy → fit = maxU.
+            double target = 1.0;
+            if (string.IsNullOrEmpty(pezzoSelezionato.NewTexturePath))
+            {
+                double maxU = 0;
+                foreach (var uv in pezzoSelezionato.Geometry.TextureCoordinates) if (uv.X > maxU) maxU = uv.X;
+                target = maxU > 0 ? maxU : 1.0;
+            }
+            slZoomSkin.Value = target;
+        }
+
+        // Offset locale UV: sposta la skin sulla superficie senza riproiettare. Solo aggiorna il viewport del brush.
+        private void ApplicaOffsetLocale(double offsetU, double offsetV)
+        {
+            foreach (var m in TrovaElementiCoinvolti())
+            {
+                m.SkinOffsetU = offsetU;
+                m.SkinOffsetV = offsetV;
+                m.OriginalMaterial = MeshHelper.CreaMaterialeWPF(m, cartellaAttuale, cartellaPadre);
+                if (m.Model3D != null)
+                {
+                    m.Model3D.Material = m.OriginalMaterial;
+                    m.Model3D.BackMaterial = m.OriginalMaterial;
+                }
+            }
+        }
+
+        // Calcola e applica l'offsetV per allineare la skin al bordo alto / centro / basso del bbox UV
+        // delle mesh selezionate. Compensa anche il TextureScale (zoom) corrente cosi' funziona a qualunque zoom.
+        private void AllineaSkinV(string modo)
+        {
+            var targets = TrovaElementiCoinvolti();
+            if (targets.Count == 0) return;
+
+            // Trovo il range UV V coperto dalle mesh selezionate
+            double minV = double.MaxValue, maxV = double.MinValue;
+            foreach (var m in targets)
+            {
+                if (m.Geometry?.TextureCoordinates == null) continue;
+                foreach (var uv in m.Geometry.TextureCoordinates)
+                {
+                    if (uv.Y < minV) minV = uv.Y;
+                    if (uv.Y > maxV) maxV = uv.Y;
+                }
+            }
+            if (minV > maxV) return;
+
+            double T = targets[0].TextureScale > 0 ? targets[0].TextureScale : 1.0;
+            double off = (1 - T) / 2;
+
+            double offsetV;
+            switch (modo)
+            {
+                case "alto":
+                    // Bordo alto della skin (image V=0) sul bordo alto del bbox UV (minV)
+                    offsetV = minV - off;
+                    break;
+                case "basso":
+                    // Bordo basso della skin (image V=1) sul bordo basso del bbox UV (maxV)
+                    offsetV = maxV - off - T;
+                    break;
+                case "centro":
+                default:
+                    // Centro dell'immagine al centro del bbox UV
+                    offsetV = (minV + maxV - 1.0) / 2;
+                    break;
+            }
+
+            isUpdatingZoom = true;
+            foreach (var m in targets)
+            {
+                m.SkinOffsetV = offsetV;
+                m.OriginalMaterial = MeshHelper.CreaMaterialeWPF(m, cartellaAttuale, cartellaPadre);
+                if (m.Model3D != null)
+                {
+                    m.Model3D.Material = m.OriginalMaterial;
+                    m.Model3D.BackMaterial = m.OriginalMaterial;
+                }
+            }
+            txtOffsetV.Text = offsetV.ToString("0.00");
+            isUpdatingZoom = false;
+        }
+
+        private void BtnAllineaAlto_Click(object sender, RoutedEventArgs e) => AllineaSkinV("alto");
+        private void BtnAllineaCentro_Click(object sender, RoutedEventArgs e) => AllineaSkinV("centro");
+        private void BtnAllineaBasso_Click(object sender, RoutedEventArgs e) => AllineaSkinV("basso");
+
+        // Restituisce true se la mesh appartiene a un file .x il cui nome inizia con "t_"
+        // (animation frames Steltronic t_1.x, t_2.x, t_strike.x, ecc.). Risale all'albero per trovare il file root.
+        private bool MeshFaParteDiFileT(MeshData mesh)
+        {
+            if (mesh == null || alberoGerarchico.Count == 0) return false;
+            MeshData fileRoot = MeshHelper.TrovaFileRootDiAppartenenza(alberoGerarchico[0], mesh);
+            if (fileRoot == null) return false;
+            // Controllo sia il Name (mostrato in tree, di solito derivato dal nome del file)
+            // sia l'OriginalFileName (percorso relativo del .x sul disco)
+            string nome = fileRoot.Name ?? "";
+            string fileName = System.IO.Path.GetFileName(fileRoot.OriginalFileName ?? "");
+            return nome.StartsWith("t_", StringComparison.OrdinalIgnoreCase)
+                || fileName.StartsWith("t_", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Pattern dei nomi di Frame Steltronic che identificano elementi di TESTO (score, total, recap, ecc.).
+        // Tutto cio' che sta dentro un frame con questi nomi va escluso dalla selezione "base scena".
+        // Esempi: FR1_T1, FR8_C2, FR3_TOT, FR5_SP1 (player.X) - NUMBERS (frameruler) - p1_name, p2_hdp, TeamName, Data (recap).
+        private static readonly System.Text.RegularExpressions.Regex regexFrameTesto =
+            new System.Text.RegularExpressions.Regex(@"^(FR\d+_|p\d+_|NUMBERS$|TeamName$|Data$)",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Compiled);
+
+        private static bool NomeFrameDiTesto(string nome) =>
+            !string.IsNullOrEmpty(nome) && regexFrameTesto.IsMatch(nome);
+
+        // Walk gerarchico che raccoglie SOLO le mesh foglia di base, saltando ogni sub-tree il cui Frame
+        // ancestor ha nome di tipo testuale (FR\d+_*, NUMBERS, p\d+_*, TeamName, Data).
+        private void RaccoglaiMeshNonTesto(MeshData node, List<MeshData> result)
+        {
+            if (node == null) return;
+            // Se questo nodo e' un Frame di testo, ferma la discesa (esclude lui e i discendenti)
+            if (node.IsGroup && NomeFrameDiTesto(node.Name)) return;
+            // Foglia con geometria reale: la prendo
+            if (!node.IsGroup && node.Geometry?.Positions != null && node.Geometry.Positions.Count > 0)
+            {
+                result.Add(node);
+            }
+            // Continua sui figli
+            foreach (var child in node.Children) RaccoglaiMeshNonTesto(child, result);
+        }
+
+        private void TxtOffsetU_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (isUpdatingZoom || pezzoSelezionato == null) return;
+            if (txtOffsetU.IsFocused && double.TryParse(txtOffsetU.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double valU))
+            {
+                double valV = double.TryParse(txtOffsetV.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double v) ? v : 0;
+                isUpdatingZoom = true;
+                ApplicaOffsetLocale(valU, valV);
+                isUpdatingZoom = false;
+            }
+        }
+
+        private void TxtOffsetV_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (isUpdatingZoom || pezzoSelezionato == null) return;
+            if (txtOffsetV.IsFocused && double.TryParse(txtOffsetV.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double valV))
+            {
+                double valU = double.TryParse(txtOffsetU.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double u) ? u : 0;
+                isUpdatingZoom = true;
+                ApplicaOffsetLocale(valU, valV);
+                isUpdatingZoom = false;
+            }
+        }
+
+        // Pulsanti incrementali per la posizione spaziale della skin (offset U/V locali).
+        // Step grande = 0.10, step piccolo = 0.01. Range clamped a [-1, 1] (limiti UV).
+        private void ApplicaPassoOffsetU(double delta)
+        {
+            if (pezzoSelezionato == null) return;
+            double cur = double.TryParse(txtOffsetU.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double u) ? u : 0;
+            double nuovo = Math.Max(-1, Math.Min(1, cur + delta));
+            isUpdatingZoom = true;
+            txtOffsetU.Text = nuovo.ToString("0.00");
+            double valV = double.TryParse(txtOffsetV.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double v) ? v : 0;
+            ApplicaOffsetLocale(nuovo, valV);
+            isUpdatingZoom = false;
+        }
+
+        private void ApplicaPassoOffsetV(double delta)
+        {
+            if (pezzoSelezionato == null) return;
+            double cur = double.TryParse(txtOffsetV.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double v) ? v : 0;
+            double nuovo = Math.Max(-1, Math.Min(1, cur + delta));
+            isUpdatingZoom = true;
+            txtOffsetV.Text = nuovo.ToString("0.00");
+            double valU = double.TryParse(txtOffsetU.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double u) ? u : 0;
+            ApplicaOffsetLocale(valU, nuovo);
+            isUpdatingZoom = false;
+        }
+
+        private void BtnOffsetU_BigMinus_Click(object sender, RoutedEventArgs e) => ApplicaPassoOffsetU(-0.10);
+        private void BtnOffsetU_Minus_Click(object sender, RoutedEventArgs e) => ApplicaPassoOffsetU(-0.01);
+        private void BtnOffsetU_Plus_Click(object sender, RoutedEventArgs e) => ApplicaPassoOffsetU(+0.01);
+        private void BtnOffsetU_BigPlus_Click(object sender, RoutedEventArgs e) => ApplicaPassoOffsetU(+0.10);
+
+        private void BtnOffsetV_BigMinus_Click(object sender, RoutedEventArgs e) => ApplicaPassoOffsetV(-0.10);
+        private void BtnOffsetV_Minus_Click(object sender, RoutedEventArgs e) => ApplicaPassoOffsetV(-0.01);
+        private void BtnOffsetV_Plus_Click(object sender, RoutedEventArgs e) => ApplicaPassoOffsetV(+0.01);
+        private void BtnOffsetV_BigPlus_Click(object sender, RoutedEventArgs e) => ApplicaPassoOffsetV(+0.10);
+
+        // Offset globale XYZ: cambia l'origine della proiezione 3D, quindi serve riproiettare le UV.
+        private void TxtOffsetXYZ_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (isUpdatingZoom || pezzoSelezionato == null) return;
+            if (!double.TryParse(txtOffsetX.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double oX)) return;
+            if (!double.TryParse(txtOffsetY.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double oY)) return;
+            if (!double.TryParse(txtOffsetZ.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double oZ)) return;
+
+            List<MeshData> targets = TrovaElementiCoinvolti();
+            foreach (var m in targets)
+            {
+                m.SkinOffsetX = oX;
+                m.SkinOffsetY = oY;
+                m.SkinOffsetZ = oZ;
+            }
+            // Solo per skin utente: riproiettiamo le UV con la nuova origine 3D
+            if (targets.Count > 0 && !string.IsNullOrEmpty(targets[0].NewTexturePath))
+            {
+                MeshHelper.ApplicaProiezionePlanare(targets);
+                foreach (var m in targets)
+                {
+                    m.OriginalMaterial = MeshHelper.CreaMaterialeWPF(m, cartellaAttuale, cartellaPadre);
+                    if (m.Model3D != null)
+                    {
+                        m.Model3D.Material = m.OriginalMaterial;
+                        m.Model3D.BackMaterial = m.OriginalMaterial;
+                    }
+                }
+            }
+        }
+
+        private void BtnResetOffsetSkin_Click(object sender, RoutedEventArgs e)
+        {
+            if (pezzoSelezionato == null) return;
+            List<MeshData> targets = TrovaElementiCoinvolti();
+            RegistraStatoUndo(targets);
+
+            foreach (var m in targets)
+            {
+                m.SkinOffsetU = 0; m.SkinOffsetV = 0;
+                m.SkinOffsetX = 0; m.SkinOffsetY = 0; m.SkinOffsetZ = 0;
+            }
+            if (targets.Count > 0 && !string.IsNullOrEmpty(targets[0].NewTexturePath))
+            {
+                MeshHelper.ApplicaProiezionePlanare(targets);
+            }
+            foreach (var m in targets)
+            {
+                m.OriginalMaterial = MeshHelper.CreaMaterialeWPF(m, cartellaAttuale, cartellaPadre);
+                if (m.Model3D != null)
+                {
+                    m.Model3D.Material = m.OriginalMaterial;
+                    m.Model3D.BackMaterial = m.OriginalMaterial;
+                }
+            }
+            AggiornaPannelloProprieta();
         }
 
         private void RectColore_Click(object sender, RoutedEventArgs e)
@@ -895,7 +1206,27 @@ namespace Creazione_griglie
                     m.NewTexturePath = ofd.FileName;
                     m.RemoveTexture = false;
                     m.TextureRotation = 0;
+                    m.TextureScale = 1.0;
+                    // Reset offset cosi la nuova skin parte centrata
+                    m.SkinOffsetU = 0; m.SkinOffsetV = 0;
+                    m.SkinOffsetX = 0; m.SkinOffsetY = 0; m.SkinOffsetZ = 0;
 
+                    // Texture di base standard quando si applica una skin: bianco diffuse + emissive, Power=250, specular nero.
+                    // Garantisce che la skin appaia coi colori naturali senza tinte indotte dal materiale originale.
+                    m.MeshColor = Color.FromRgb(255, 255, 255);
+                    m.Alpha = 1.0;
+                    m.Power = 250.0;
+                    m.Specular = Color.FromRgb(0, 0, 0);
+                    m.Emissive = Color.FromRgb(255, 255, 255);
+                    m.HasColor = true;
+                }
+
+                // Rigenero le UV con proiezione planare condivisa fra tutte le mesh selezionate, cosi la
+                // skin appare come una decalcomania unica anche su gruppi multi-mesh e su superfici curve.
+                MeshHelper.ApplicaProiezionePlanare(targetMeshes);
+
+                foreach (var m in targetMeshes)
+                {
                     m.OriginalMaterial = MeshHelper.CreaMaterialeWPF(m, cartellaAttuale, cartellaPadre);
                     if (m.Model3D != null)
                     {
@@ -908,12 +1239,53 @@ namespace Creazione_griglie
             }
         }
 
+        // Seleziona TUTTI gli elementi visibili (foglia) come se fossero un'unica selezione: il pannello
+        // proprieta' si abilita e ogni operazione (skin, colore, zoom, offset) si applica a tutti contemporaneamente.
+        // Il flag modalitaScena viene letto da TrovaElementiCoinvolti per restituire l'intera scena invece
+        // delle sole mesh che condividono la texture del pezzo selezionato.
+        private void BtnSelezionaScena_Click(object sender, RoutedEventArgs e)
+        {
+            if (alberoGerarchico.Count == 0) return;
+
+            // Sorgente della "scena": file attivo se massimizzato, altrimenti tutta la gerarchia (galleria)
+            var sorgenti = fileAttivoVisibile != null
+                ? new List<MeshData> { fileAttivoVisibile }
+                : new List<MeshData>(alberoGerarchico);
+
+            // Raccolgo le foglie attraverso un walk gerarchico che esclude i sub-tree con nomi tipici di testo
+            // (FR1_T1, FR1_C1, NUMBERS, p1_name, ecc.) cosi la skin va sugli elementi base e non sulle scritte.
+            var foglie = new List<MeshData>();
+            foreach (var s in sorgenti) RaccoglaiMeshNonTesto(s, foglie);
+            // Filtro aggiuntivo: escludo le mesh dei file t_*.x (animation frames Steltronic)
+            foglie = foglie.Where(m => !MeshFaParteDiFileT(m)).ToList();
+
+            if (foglie.Count == 0)
+            {
+                txtStatus.Text = "Nessun elemento da selezionare sulla scena.";
+                return;
+            }
+
+            // Metto un rappresentante come pezzoSelezionato (il primo) cosi il pannello si abilita.
+            // Attivo modalitaScena per far si che TrovaElementiCoinvolti restituisca TUTTE le foglie.
+            SvuotaSelezione();
+            foreach (var f in foglie) f.IsSelected = true;
+            pezzoSelezionato = foglie[0];
+            modalitaScena = true;
+
+            AggiornaPannelloProprieta();
+            ApplicaTrasparenzaAlModello3D();
+            txtStatus.Text = $"Scena selezionata ({foglie.Count} elementi). Usa colore/skin/zoom per modificare tutto insieme.";
+        }
+
         private void BtnRemoveSkin_Click(object sender, RoutedEventArgs e)
         {
             if (pezzoSelezionato == null) return;
 
             List<MeshData> targetMeshes = TrovaElementiCoinvolti();
             RegistraStatoUndo(targetMeshes);
+
+            // Ripristino le UV originali del file .x prima di rifare il materiale
+            MeshHelper.RipristinaUVOriginali(targetMeshes);
 
             foreach (var m in targetMeshes)
             {
@@ -1076,6 +1448,7 @@ namespace Creazione_griglie
 
         private bool EseguiSalvataggio(string cartellaDestinazione)
         {
+            var riassuntoSalvataggio = new List<string>();
             try
             {
                 if (alberoGerarchico[0].Children.Count > 0)
@@ -1128,8 +1501,11 @@ namespace Creazione_griglie
 
                         string fullDestPath = Path.Combine(cartellaDestinazione, fileRoot.OriginalFileName);
                         Directory.CreateDirectory(Path.GetDirectoryName(fullDestPath));
-                        string nuovoTestoX = XFileEngine.ApplicaSalvataggio(fileRoot.OriginalXFileContent, tuttiNodiFile);
+                        string nuovoTestoX = XFileEngine.ApplicaSalvataggio(fileRoot.OriginalXFileContent, tuttiNodiFile, out string diag);
                         File.WriteAllText(fullDestPath, nuovoTestoX);
+
+                        // Diagnostica per scoprire se le sostituzioni vanno a segno
+                        riassuntoSalvataggio.Add($"{fileRoot.OriginalFileName}: {diag}");
                     }
 
                     if (viewPortMassimizzato.Background is SolidColorBrush bgBrush)
@@ -1147,6 +1523,10 @@ namespace Creazione_griglie
                         if (!immaginiConservate.Contains(Path.GetFileName(file)))
                             File.Delete(file);
                     }
+
+                    // Conferma a video che il salvataggio e' stato completato
+                    if (riassuntoSalvataggio.Count > 0)
+                        MessageBox.Show("Salvataggio completato con successo.", "Salvataggio", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 return true;
             }
