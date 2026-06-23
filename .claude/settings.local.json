@@ -15,7 +15,29 @@
       "Read(///10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#1/p10/**)",
       "Bash(xxd \"//10.11.1.1/c\\\\$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#20/p10/player.x\")",
       "Bash(xxd \"//10.11.1.1/c\\\\$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#1/p10/player.X\")",
-      "Read(///10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#2/p10/**)"
+      "Read(///10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#2/p10/**)",
+      "Bash(file *.png)",
+      "Bash(python make_outline_test.py)",
+      "Bash(python -)",
+      "Bash([ -e \"$BASE/style#15\" ])",
+      "Bash(exit 1)",
+      "Bash(cp -r '//10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#1' '//10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#15')",
+      "Bash(cp 'C:/Users/dario.STELNET/source/repos/Creazione griglie/_test_contorno/player.X' '//10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#15/p10/player.X')",
+      "Read(///10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#15/**)",
+      "Bash(python make_diag_test.py)",
+      "Bash(cp player.X '__TRACKED_VAR__/style#15/p10/player.X')",
+      "Bash(md5sum '__TRACKED_VAR__/style#15/p10/player.X')",
+      "Bash(python make_tN_outline.py)",
+      "Bash(python - '//10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#15/p10/t_1.x')",
+      "Read(///10.11.1.1/c$/Program Files \\(x86\\)/Steltronic/Vision/MediaNova/MeshBase/Styles/style#15/p10/**)",
+      "Bash(wc -c)",
+      "Bash(python make_tN_merged.py)",
+      "Bash(cat)",
+      "Bash(python make_slot_2mat.py)",
+      "Bash(grep -c _OUT __TRACKED_VAR__/t_1.x)",
+      "Read(//c/Users/dario.STELNET/source/repos/Creazione griglie/_test_contorno/**)",
+      "Bash(python make_slot_border.py)",
+      "Bash(git restore *)"
     ]
   }
 }
