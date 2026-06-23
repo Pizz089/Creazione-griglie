@@ -154,6 +154,12 @@ namespace Creazione_griglie
         // invece che alla sola selezione. Attivato da BtnSelezionaScena_Click, disattivato quando l'utente
         // clicca un singolo elemento (TreeView o viewport) per tornare a selezione puntuale.
         private bool modalitaScena = false;
+        // Multi-selezione: attivata da Shift+click nel viewport. Tutte le mesh in meshSelezionate diventano
+        // bersaglio di TrovaElementiCoinvolti. pezzoSelezionato resta uno qualunque della multi-selezione
+        // (l'ultimo cliccato) cosi' il pannello proprieta' resta abilitato. Uso un HashSet indipendente da
+        // IsSelected perche' il TreeView e' single-select e azzera l'IsSelected delle mesh non focus.
+        private bool multiSelezione = false;
+        private readonly HashSet<MeshData> meshSelezionate = new HashSet<MeshData>();
         private bool isUpdatingLuci = false;
         private LightSettings impostazioniLuci = new LightSettings();
 
@@ -617,6 +623,14 @@ namespace Creazione_griglie
                 return targets;
             }
 
+            if (multiSelezione)
+            {
+                // Multi-selezione via Shift+click: ritorno tutte le mesh nel set indipendente
+                // (non posso usare IsSelected perche' il TreeView e' single-select e lo azzera).
+                targets.AddRange(meshSelezionate.Where(m => !m.IsGroup && m.Geometry?.Positions != null && m.Geometry.Positions.Count > 0));
+                return targets;
+            }
+
             if (chkApplicaATutti.IsChecked == true && pezzoSelezionato != null)
             {
                 List<MeshData> tutti = new List<MeshData>();
@@ -654,8 +668,10 @@ namespace Creazione_griglie
             MeshData nuovoSelezionato = treeComponenti.SelectedItem as MeshData;
             if (nuovoSelezionato == null) return;
 
-            // Selezione puntuale: esco dalla modalita' scena
+            // Selezione puntuale: esco dalla modalita' scena e dalla multi-selezione
             modalitaScena = false;
+            multiSelezione = false;
+            meshSelezionate.Clear();
 
             if (nuovoSelezionato.IsGroup && string.IsNullOrEmpty(nuovoSelezionato.OriginalXFileContent))
             {
@@ -681,6 +697,7 @@ namespace Creazione_griglie
         {
             Point p = e.GetPosition(viewPortMassimizzato);
             HitTestResult result = VisualTreeHelper.HitTest(viewPortMassimizzato, p);
+            bool shiftPremuto = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
 
             if (result is RayMeshGeometry3DHitTestResult ray && ray.ModelHit is GeometryModel3D hit)
             {
@@ -691,8 +708,41 @@ namespace Creazione_griglie
                 {
                     if (m.Model3D == hit)
                     {
-                        // Selezione puntuale: esco dalla modalita' scena
+                        // Shift+click: toggle multi-selezione senza azzerare le altre
+                        if (shiftPremuto)
+                        {
+                            modalitaScena = false;
+                            // Se non ero in multi-selezione, ci entro includendo la precedente pezzoSelezionato
+                            if (!multiSelezione && pezzoSelezionato != null)
+                            {
+                                meshSelezionate.Add(pezzoSelezionato);
+                            }
+                            multiSelezione = true;
+
+                            if (meshSelezionate.Contains(m))
+                            {
+                                meshSelezionate.Remove(m);
+                                if (pezzoSelezionato == m)
+                                {
+                                    pezzoSelezionato = meshSelezionate.FirstOrDefault();
+                                    if (pezzoSelezionato == null) multiSelezione = false;
+                                }
+                            }
+                            else
+                            {
+                                meshSelezionate.Add(m);
+                                pezzoSelezionato = m;
+                            }
+                            AggiornaPannelloProprieta();
+                            ApplicaTrasparenzaAlModello3D();
+                            MeshHelper.EspandiGenitori(alberoGerarchico, m);
+                            return;
+                        }
+
+                        // Click normale: selezione puntuale, esco da modalita' scena e multi-selezione
                         modalitaScena = false;
+                        multiSelezione = false;
+                        meshSelezionate.Clear();
                         SvuotaSelezione();
                         m.IsSelected = true;
 
@@ -705,8 +755,10 @@ namespace Creazione_griglie
                     }
                 }
             }
-            // Click su area vuota del viewport: esco anche dalla modalita' scena
+            // Click su area vuota del viewport: esco anche dalle modalita' scena/multi-selezione
             modalitaScena = false;
+            multiSelezione = false;
+            meshSelezionate.Clear();
             SvuotaSelezione();
         }
 
@@ -721,6 +773,11 @@ namespace Creazione_griglie
                 {
                     int n = TrovaElementiCoinvolti().Count;
                     txtNomeSelezionato.Text = $"Scena intera ({n} elementi)";
+                }
+                else if (multiSelezione)
+                {
+                    int n = TrovaElementiCoinvolti().Count;
+                    txtNomeSelezionato.Text = $"Multi-selezione ({n} elementi)";
                 }
                 else
                 {
@@ -1042,27 +1099,29 @@ namespace Creazione_griglie
 
         // Pulsanti incrementali per la posizione spaziale della skin (offset U/V locali).
         // Step grande = 0.10, step piccolo = 0.01. Range clamped a [-1, 1] (limiti UV).
+        // Leggo i valori correnti direttamente dalle proprieta' della mesh (pezzoSelezionato.SkinOffsetU/V)
+        // per evitare incoerenze col testo della textbox (focus/refresh/click ripetuti).
         private void ApplicaPassoOffsetU(double delta)
         {
             if (pezzoSelezionato == null) return;
-            double cur = double.TryParse(txtOffsetU.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double u) ? u : 0;
-            double nuovo = Math.Max(-1, Math.Min(1, cur + delta));
+            double cur = pezzoSelezionato.SkinOffsetU;
+            double nuovoU = Math.Max(-1, Math.Min(1, cur + delta));
+            double valV = pezzoSelezionato.SkinOffsetV;
             isUpdatingZoom = true;
-            txtOffsetU.Text = nuovo.ToString("0.00");
-            double valV = double.TryParse(txtOffsetV.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double v) ? v : 0;
-            ApplicaOffsetLocale(nuovo, valV);
+            txtOffsetU.Text = nuovoU.ToString("0.00");
+            ApplicaOffsetLocale(nuovoU, valV);
             isUpdatingZoom = false;
         }
 
         private void ApplicaPassoOffsetV(double delta)
         {
             if (pezzoSelezionato == null) return;
-            double cur = double.TryParse(txtOffsetV.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double v) ? v : 0;
-            double nuovo = Math.Max(-1, Math.Min(1, cur + delta));
+            double cur = pezzoSelezionato.SkinOffsetV;
+            double nuovoV = Math.Max(-1, Math.Min(1, cur + delta));
+            double valU = pezzoSelezionato.SkinOffsetU;
             isUpdatingZoom = true;
-            txtOffsetV.Text = nuovo.ToString("0.00");
-            double valU = double.TryParse(txtOffsetU.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double u) ? u : 0;
-            ApplicaOffsetLocale(valU, nuovo);
+            txtOffsetV.Text = nuovoV.ToString("0.00");
+            ApplicaOffsetLocale(valU, nuovoV);
             isUpdatingZoom = false;
         }
 
@@ -1316,12 +1375,17 @@ namespace Creazione_griglie
             {
                 if (m.Model3D == null || m.OriginalMaterial == null) continue;
 
-                if (pezzoSelezionato == null)
+                // In multi-selezione tutte le mesh nel set sono evidenziate; altrimenti solo pezzoSelezionato.
+                bool isHighlighted = multiSelezione
+                    ? meshSelezionate.Contains(m)
+                    : (m == pezzoSelezionato);
+
+                if (pezzoSelezionato == null && !multiSelezione)
                 {
                     m.Model3D.Material = m.OriginalMaterial;
                     m.Model3D.BackMaterial = m.OriginalMaterial;
                 }
-                else if (m == pezzoSelezionato)
+                else if (isHighlighted)
                 {
                     MaterialGroup highlightGroup = new MaterialGroup();
                     highlightGroup.Children.Add(m.OriginalMaterial);
