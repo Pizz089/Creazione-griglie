@@ -64,7 +64,7 @@ Styles live at:
 ### Localization & Theming
 - `App.xaml` merges three resource dictionaries: `Tema.xaml` (colors), `Stili.xaml` (control styles), and `Lingue/Stringhe_IT.xaml` (Italian strings)
 - All UI strings use `{DynamicResource StrXxx}` keys defined in the language files
-- `Lingue/Stringhe_EN.xaml` exists for English but is not currently wired up
+- Italian (`Stringhe_IT.xaml`) and English (`Stringhe_EN.xaml`) are both wired up. `App.ImpostaLingua("IT"|"EN")` hot-swaps the strings dictionary in `Application.Current.Resources` (DynamicResource makes it live). Triggered by the `StartupDialog` language combo and by the IT/EN toggle in the `MainWindow` title bar. The choice is persisted by `Preferenze` (`%AppData%\CreazioneGriglie\settings.json`) and re-applied on the next launch in `App.OnStartup` (defaults to IT if absent)
 
 ### Supported Bowling Game Types
 The loader recognizes subfolders by name: `p10` (10 Pin), `p5` (5 Pin), `duck` (Duck Pin), `candle` (Candle Pin). Files starting with `t_` are excluded (they are frame-type animation frames). `recap.x` at the style root is always included.

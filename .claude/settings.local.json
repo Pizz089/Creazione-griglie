@@ -37,7 +37,18 @@
       "Bash(grep -c _OUT __TRACKED_VAR__/t_1.x)",
       "Read(//c/Users/dario.STELNET/source/repos/Creazione griglie/_test_contorno/**)",
       "Bash(python make_slot_border.py)",
-      "Bash(git restore *)"
+      "Bash(git restore *)",
+      "Read(//tmp/**)",
+      "Bash(grep -rhoP 'DynamicResource\\\\s+\\\\K\\(Str|Msg\\)[A-Za-z0-9]+' --include=*.xaml --include=*.cs .)",
+      "Bash(grep -rhoP 'TryFindResource\\\\\\(\"\\\\K\\(Str|Msg\\)[A-Za-z0-9]+' --include=*.cs .)",
+      "Bash(grep -rhoP 'FindResource\\\\\\(\"\\\\K\\(Str|Msg\\)[A-Za-z0-9]+' --include=*.cs .)",
+      "Bash(sort -u /tmp/refs.txt)",
+      "Bash(grep -rhoP 'DynamicResource\\\\s+\\\\K\\(Str|Msg\\)[A-Za-z0-9]+' --include=*.xaml --include=*.cs '/c/Users/dario.STELNET/source/repos/Creazione griglie/Creazione griglie')",
+      "Bash(grep -rhoP '\\(TryFindResource|FindResource\\)\\\\\\(\"\\\\K\\(Str|Msg\\)[A-Za-z0-9]+' --include=*.cs '/c/Users/dario.STELNET/source/repos/Creazione griglie/Creazione griglie')",
+      "Bash(timeout 35 dotnet run --project \"Creazione griglie/Creazione griglie.csproj\")",
+      "Bash(kill -0 %1)",
+      "Bash(kill %1)",
+      "Bash(timeout 30 dotnet run --project \"Creazione griglie/Creazione griglie.csproj\")"
     ]
   }
 }

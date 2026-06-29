@@ -163,6 +163,15 @@ namespace Creazione_griglie
         private bool isUpdatingLuci = false;
         private LightSettings impostazioniLuci = new LightSettings();
 
+        // TeamStyle: una TeamStyleData per ogni tipo gioco presente nello stile corrente
+        private readonly Dictionary<string, TeamStyleData> teamStyles = new Dictionary<string, TeamStyleData>(StringComparer.OrdinalIgnoreCase);
+        private static readonly string[] teamGameTypes = { "p10", "p5", "duck", "candle" };
+        private static readonly Dictionary<string, string> teamGameNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "p10", "10 Pin" }, { "p5", "5 Pin" }, { "duck", "Duck Pin" }, { "candle", "Candle Pin" }
+        };
+        private bool isUpdatingTeam = false;
+
         private UndoManager _undoManager = new UndoManager();
 
         public MainWindow()
@@ -171,6 +180,10 @@ namespace Creazione_griglie
 
             treeComponenti.ItemsSource = alberoGerarchico;
             listaGruppiGalleria.ItemsSource = GruppiGalleria;
+
+            // Allineo il toggle lingua alla preferenza già applicata da App.OnStartup
+            if (App.LinguaCorrente == "EN") rbLinguaEN.IsChecked = true;
+            else rbLinguaIT.IsChecked = true;
 
             btnSalva.IsEnabled = false;
 
@@ -430,6 +443,7 @@ namespace Creazione_griglie
                 impostazioniLuci = XmlHelper.LeggiImpostazioniLuci(fileXml);
                 PopolaTextboxLuci();
                 ApplicaSfondoDaXML();
+                CaricaTeamStyles();
                 SvuotaSelezione();
                 ImpostaVistaU();
 
@@ -843,6 +857,127 @@ namespace Creazione_griglie
             rectLuce1Colore.Background = new SolidColorBrush(impostazioniLuci.Diffuse1);
             rectLuce2Colore.Background = new SolidColorBrush(impostazioniLuci.Diffuse2);
             isUpdatingLuci = false;
+        }
+
+        // ===================== TeamStyle =====================
+
+        // Carica i TeamStyle.xml dei tipi gioco presenti nello stile corrente e prepara il tab.
+        private void CaricaTeamStyles()
+        {
+            teamStyles.Clear();
+            foreach (var g in teamGameTypes)
+            {
+                string p = Path.Combine(cartellaAttuale, g, "TeamStyle.xml");
+                if (File.Exists(p)) teamStyles[g] = TeamStyleHelper.Load(p);
+            }
+
+            isUpdatingTeam = true;
+            cmbTeamGioco.Items.Clear();
+            foreach (var g in teamGameTypes)
+                if (teamStyles.ContainsKey(g))
+                    cmbTeamGioco.Items.Add(new ComboBoxItem { Content = teamGameNames[g], Tag = g });
+            if (cmbTeamGioco.Items.Count > 0) cmbTeamGioco.SelectedIndex = 0;
+            isUpdatingTeam = false;
+
+            bool any = teamStyles.Count > 0;
+            txtTeamVuoto.Visibility = any ? Visibility.Collapsed : Visibility.Visible;
+            pannelloTeamCampi.Visibility = any ? Visibility.Visible : Visibility.Collapsed;
+            cmbTeamGioco.IsEnabled = rbTeamPerGame.IsChecked == true;
+
+            if (any) PopolaCampiTeam(CurrentTeamData());
+        }
+
+        private string SelectedTeamGame()
+        {
+            if (cmbTeamGioco.SelectedItem is ComboBoxItem it && it.Tag is string s) return s;
+            return teamStyles.Keys.FirstOrDefault();
+        }
+
+        private TeamStyleData CurrentTeamData()
+        {
+            string g = SelectedTeamGame();
+            if (g != null && teamStyles.TryGetValue(g, out var d)) return d;
+            return teamStyles.Values.FirstOrDefault();
+        }
+
+        // I bersagli della modifica: tutti i giochi oppure solo quello selezionato.
+        private IEnumerable<TeamStyleData> TeamTargets()
+        {
+            if (rbTeamAll.IsChecked == true) return teamStyles.Values.ToList();
+            string g = SelectedTeamGame();
+            if (g != null && teamStyles.TryGetValue(g, out var d)) return new[] { d };
+            return Enumerable.Empty<TeamStyleData>();
+        }
+
+        // Riempie tutti i campi (numerici + campioni colore) del tab TeamStyle dai dati indicati.
+        private void PopolaCampiTeam(TeamStyleData d)
+        {
+            if (d == null) return;
+            isUpdatingTeam = true;
+            foreach (var obj in LogicalDescendants(pannelloTeamCampi))
+            {
+                if (obj is TextBox tb && tb.Tag is string k && d.Scalars.ContainsKey(k))
+                    tb.Text = d.Scalars[k].ToString("0.###", CultureInfo.InvariantCulture);
+                else if (obj is Border b && b.Tag is string ck && d.Colors.ContainsKey(ck))
+                    b.Background = new SolidColorBrush(d.Colors[ck]);
+            }
+            isUpdatingTeam = false;
+        }
+
+        private void TeamMode_Changed(object sender, RoutedEventArgs e)
+        {
+            if (cmbTeamGioco == null) return; // può scattare durante l'inizializzazione XAML
+            cmbTeamGioco.IsEnabled = rbTeamPerGame.IsChecked == true;
+        }
+
+        private void TeamGioco_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (isUpdatingTeam) return;
+            PopolaCampiTeam(CurrentTeamData());
+        }
+
+        private void TeamNum_Changed(object sender, TextChangedEventArgs e)
+        {
+            if (isUpdatingTeam) return;
+            if (!(sender is TextBox tb) || !(tb.Tag is string k)) return;
+            if (!double.TryParse(tb.Text.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out double v)) return;
+            foreach (var d in TeamTargets()) d.Scalars[k] = v;
+            if (!StyleEnvironment.IsStyleProtected(Path.GetFileName(cartellaAttuale))) btnSalva.IsEnabled = true;
+        }
+
+        private void TeamColore_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (!(sender is Border bd) || !(bd.Tag is string k) || teamStyles.Count == 0) return;
+
+            Color start = Colors.White;
+            var cur = CurrentTeamData();
+            if (cur != null && cur.Colors.TryGetValue(k, out var c0)) start = c0;
+
+            var cp = new FlatColorPicker(start) { Owner = this };
+            if (cp.ShowDialog() == true)
+            {
+                foreach (var d in TeamTargets()) d.Colors[k] = cp.FinalColor;
+                bd.Background = new SolidColorBrush(cp.FinalColor);
+                if (!StyleEnvironment.IsStyleProtected(Path.GetFileName(cartellaAttuale))) btnSalva.IsEnabled = true;
+            }
+        }
+
+        private void SalvaTeamStyles(string cartellaDestinazione)
+        {
+            foreach (var kv in teamStyles)
+                TeamStyleHelper.Save(Path.Combine(cartellaDestinazione, kv.Key, "TeamStyle.xml"), kv.Value);
+        }
+
+        private static IEnumerable<DependencyObject> LogicalDescendants(DependencyObject root)
+        {
+            foreach (var child in LogicalTreeHelper.GetChildren(root))
+            {
+                if (child is DependencyObject d)
+                {
+                    yield return d;
+                    foreach (var sub in LogicalDescendants(d)) yield return sub;
+                }
+            }
         }
 
         private void RectLuceColore_Click(object sender, MouseButtonEventArgs e)
@@ -1577,6 +1712,8 @@ namespace Creazione_griglie
 
                     XmlHelper.SalvaLuciInXML(impostazioniLuci, Path.Combine(cartellaDestinazione, "Lights.xml"));
 
+                    SalvaTeamStyles(cartellaDestinazione);
+
                     ThumbnailGenerator.GeneraIcona(cartellaDestinazione, alberoGerarchico[0], cartellaAttuale, cartellaPadre);
 
                     // Elimina tutte le immagini nella cartella destinazione non presenti nella lista attiva
@@ -1734,6 +1871,9 @@ namespace Creazione_griglie
             return defaultVal;
         }
 
+        private void LinguaIT_Checked(object sender, RoutedEventArgs e) => App.ImpostaLingua("IT");
+        private void LinguaEN_Checked(object sender, RoutedEventArgs e) => App.ImpostaLingua("EN");
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             this.Opacity = 0;
@@ -1741,6 +1881,10 @@ namespace Creazione_griglie
             StartupDialog dialog = new StartupDialog();
             dialog.Owner = this;
             dialog.ShowDialog();
+
+            // Allineo il toggle lingua della title bar alla scelta fatta nel dialog d'avvio
+            if (App.LinguaCorrente == "EN") rbLinguaEN.IsChecked = true;
+            else rbLinguaIT.IsChecked = true;
 
             if (dialog.SceltaUtente == StartupAction.Nessuna)
             {

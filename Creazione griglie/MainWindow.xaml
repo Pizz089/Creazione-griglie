@@ -31,6 +31,12 @@
                 <TextBlock Text="DirectX .X Editor 3D" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TestoSecondario}" VerticalAlignment="Center"/>
             </StackPanel>
 
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                <Path Data="{StaticResource IconDataTranslate}" Width="13" Height="13" Stretch="Uniform" Fill="{DynamicResource TestoSecondario}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                <RadioButton x:Name="rbLinguaIT" GroupName="Lingua" Style="{StaticResource TabToggleStyle}" Content="IT" FontSize="11" Checked="LinguaIT_Checked" Margin="0,0,4,0"/>
+                <RadioButton x:Name="rbLinguaEN" GroupName="Lingua" Style="{StaticResource TabToggleStyle}" Content="EN" FontSize="11" Checked="LinguaEN_Checked"/>
+            </StackPanel>
+
             <StackPanel Grid.Column="2" Orientation="Horizontal">
                 <Button Style="{StaticResource MaterialIconButtonStyle}" Width="45" Height="32" Padding="0" shell:WindowChrome.IsHitTestVisibleInChrome="True" Click="Minimize_Click">
                     <Path Data="{StaticResource IconDataMinimize}" Fill="{DynamicResource TestoSecondario}" Stretch="Uniform" Width="12" Height="12"/>
@@ -80,9 +86,9 @@
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="btnSalva" Click="BtnSalva_Click" Style="{StaticResource BaseCardButtonStyle}" Margin="4,0,0,0" Padding="15,8" Foreground="{DynamicResource TestoPrincipale}">
+                    <Button x:Name="btnSalva" Click="BtnSalva_Click" Style="{StaticResource PrimaryActionButtonStyle}" Margin="4,0,0,0" Padding="15,8">
                         <StackPanel Orientation="Horizontal">
-                            <Path Data="{StaticResource IconDataSave}" Fill="{DynamicResource TestoPrincipale}" Stretch="Uniform" Margin="0,0,8,0" Width="16" Height="16"/>
+                            <Path Data="{StaticResource IconDataSave}" Fill="White" Stretch="Uniform" Margin="0,0,8,0" Width="16" Height="16"/>
                             <TextBlock Text="{DynamicResource StrSalva}" VerticalAlignment="Center" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Button>
@@ -109,11 +115,17 @@
 
                 <Border Grid.Column="0" Background="{DynamicResource BgCard}" Margin="10,0,4,10" CornerRadius="8" Effect="{StaticResource OmbraCard}">
                     <DockPanel Margin="10">
-                        <TextBlock DockPanel.Dock="Top" Text="{DynamicResource StrGerarchia}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TestoPrincipale}" Margin="0,0,0,10" TextAlignment="Center"/>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,12">
+                            <Path Data="{StaticResource IconDataStyle}" Width="18" Height="18" Stretch="Uniform" Fill="{DynamicResource ColorePrimario}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{DynamicResource StrGerarchia}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TestoPrincipale}" VerticalAlignment="Center"/>
+                        </StackPanel>
 
-                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource BgFinestra}" CornerRadius="8" Padding="12" Margin="0,15,0,0">
+                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource BgFinestra}" CornerRadius="8" Padding="12,10" Margin="0,15,0,0" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1">
                             <StackPanel>
-                                <TextBlock Text="{DynamicResource StrComandi}" FontWeight="Bold" Foreground="{DynamicResource TestoPrincipale}" FontSize="12" Margin="0,0,0,8" HorizontalAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                    <Path Data="{StaticResource IconDataInfo}" Width="13" Height="13" Stretch="Uniform" Fill="{DynamicResource ColorePrimario}" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{DynamicResource StrComandi}" Style="{StaticResource SectionHeaderText}" Foreground="{DynamicResource TestoPrincipale}"/>
+                                </StackPanel>
 
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -127,17 +139,25 @@
                                         <RowDefinition Height="auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Clic Sx:" FontWeight="SemiBold" Foreground="{DynamicResource TestoPrincipale}" FontSize="11" Margin="0,2,8,2" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{DynamicResource StrSeleziona}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" Margin="0,2,0,2" VerticalAlignment="Center"/>
+                                    <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource KeyBadgeStyle}" Margin="0,3">
+                                        <TextBlock Text="Clic Sx" FontWeight="SemiBold" Foreground="{DynamicResource TestoPrincipale}" FontSize="11" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{DynamicResource StrSeleziona}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" Margin="10,3,0,3" VerticalAlignment="Center"/>
 
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Clic Dx:" FontWeight="SemiBold" Foreground="{DynamicResource TestoPrincipale}" FontSize="11" Margin="0,2,8,2" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{DynamicResource StrRuota}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" Margin="0,2,0,2" VerticalAlignment="Center"/>
+                                    <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource KeyBadgeStyle}" Margin="0,3">
+                                        <TextBlock Text="Clic Dx" FontWeight="SemiBold" Foreground="{DynamicResource TestoPrincipale}" FontSize="11" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{DynamicResource StrRuota}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" Margin="10,3,0,3" VerticalAlignment="Center"/>
 
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Middle:" FontWeight="SemiBold" Foreground="{DynamicResource TestoPrincipale}" FontSize="11" Margin="0,2,8,2" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{DynamicResource StrPan}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" Margin="0,2,0,2" VerticalAlignment="Center"/>
+                                    <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource KeyBadgeStyle}" Margin="0,3">
+                                        <TextBlock Text="Middle" FontWeight="SemiBold" Foreground="{DynamicResource TestoPrincipale}" FontSize="11" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{DynamicResource StrPan}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" Margin="10,3,0,3" VerticalAlignment="Center"/>
 
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Scroll:" FontWeight="SemiBold" Foreground="{DynamicResource TestoPrincipale}" FontSize="11" Margin="0,2,8,2" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{DynamicResource StrZoom}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" Margin="0,2,0,2" VerticalAlignment="Center"/>
+                                    <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource KeyBadgeStyle}" Margin="0,3">
+                                        <TextBlock Text="Scroll" FontWeight="SemiBold" Foreground="{DynamicResource TestoPrincipale}" FontSize="11" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{DynamicResource StrZoom}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" Margin="10,3,0,3" VerticalAlignment="Center"/>
                                 </Grid>
                             </StackPanel>
                         </Border>
@@ -285,52 +305,24 @@
                 <GridSplitter Grid.Column="3" Style="{StaticResource ModernGridSplitterStyle}" Margin="0,0,0,10" VerticalAlignment="Stretch" HorizontalAlignment="Center"/>
 
                 <Border Grid.Column="4" Background="{DynamicResource BgCard}" Margin="4,0,10,10" CornerRadius="8" Effect="{StaticResource OmbraCard}">
-                    <DockPanel>
-                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="5" Margin="15,0,15,15">
-                            <StackPanel x:Name="pannelloSfondo" Margin="10">
-                                <TextBlock Text="{DynamicResource StrSfondoVisual}" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,8" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                                <Button x:Name="btnSfondoColore" Content="{DynamicResource StrCambiaSfondo}" Margin="0" Style="{StaticResource BaseCardButtonStyle}" Click="BtnSfondoColore_Click" Foreground="{DynamicResource TestoPrincipale}" Background="{DynamicResource BgPulsante}" Padding="10"/>
-                            </StackPanel>
-                        </Border>
-
-                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8" Margin="15,0,15,8">
-                            <StackPanel Margin="5">
-                                <TextBlock Text="{DynamicResource StrLuci}" Foreground="{DynamicResource TestoSecondario}" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="28"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="26"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="X" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="11"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Y" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="11"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="Z" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="11"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource StrLuce1}" Foreground="{DynamicResource TestoPrincipale}" VerticalAlignment="Center" FontSize="11" Margin="0,2,4,2"/>
-                                    <TextBox x:Name="txtLuce1X" Grid.Row="1" Grid.Column="1" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
-                                    <TextBox x:Name="txtLuce1Y" Grid.Row="1" Grid.Column="2" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
-                                    <TextBox x:Name="txtLuce1Z" Grid.Row="1" Grid.Column="3" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
-                                    <Border x:Name="rectLuce1Colore" Grid.Row="1" Grid.Column="4" Width="20" Height="20" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" HorizontalAlignment="Center" VerticalAlignment="Center" MouseLeftButtonDown="RectLuceColore_Click"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource StrLuce2}" Foreground="{DynamicResource TestoPrincipale}" VerticalAlignment="Center" FontSize="11" Margin="0,2,4,2"/>
-                                    <TextBox x:Name="txtLuce2X" Grid.Row="2" Grid.Column="1" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
-                                    <TextBox x:Name="txtLuce2Y" Grid.Row="2" Grid.Column="2" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
-                                    <TextBox x:Name="txtLuce2Z" Grid.Row="2" Grid.Column="3" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
-                                    <Border x:Name="rectLuce2Colore" Grid.Row="2" Grid.Column="4" Width="20" Height="20" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" HorizontalAlignment="Center" VerticalAlignment="Center" MouseLeftButtonDown="RectLuceColore_Click"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-
+                    <TabControl Style="{StaticResource ModernTabControlStyle}" SelectedIndex="0">
+                        <TabItem>
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconDataPalette}" Width="14" Height="14" Stretch="Uniform" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{DynamicResource StrTabMateriale}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </TabItem.Header>
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel x:Name="pannelloProprieta" Margin="15,15,15,0">
                             <StackPanel x:Name="pannelloSelezionePart1" IsEnabled="False">
-                                <TextBlock Text="{DynamicResource StrProprieta}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TestoPrincipale}" Margin="0,0,0,5" TextAlignment="Center"/>
-                                <TextBlock x:Name="txtNomeSelezionato" Text="{DynamicResource StrNessunaSelezione}" Foreground="{DynamicResource ColorePrimario}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,10" TextAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
+                                    <Path Data="{StaticResource IconDataInfo}" Width="18" Height="18" Stretch="Uniform" Fill="{DynamicResource ColorePrimario}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{DynamicResource StrProprieta}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TestoPrincipale}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <Border Background="{DynamicResource ColoreSelezione}" CornerRadius="6" Padding="10,5" Margin="0,0,0,12">
+                                    <TextBlock x:Name="txtNomeSelezionato" Text="{DynamicResource StrNessunaSelezione}" Foreground="{DynamicResource TestoPrincipale}" FontWeight="SemiBold" TextWrapping="Wrap" TextAlignment="Center"/>
+                                </Border>
 
                                 <Button x:Name="btnInfoOggetto" Visibility="Collapsed" Style="{StaticResource BaseCardButtonStyle}"
                                         Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}"
@@ -343,7 +335,10 @@
 
                                 <CheckBox x:Name="chkApplicaATutti" Content="{DynamicResource StrApplicaTutti}" Style="{StaticResource ModernToggleStyle}" Margin="0,5,0,15" IsChecked="True" FontSize="14" Cursor="Hand"/>
 
-                                <TextBlock Text="{DynamicResource StrColore}" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                    <Path Data="{StaticResource IconDataPalette}" Style="{StaticResource SectionHeaderIcon}"/>
+                                    <TextBlock Text="{DynamicResource StrColore}" Style="{StaticResource SectionHeaderText}"/>
+                                </StackPanel>
                                 <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8" Margin="0,0,0,20">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -356,10 +351,18 @@
                                 </Border>
                             </StackPanel>
 
-                            <Button x:Name="btnSelezionaScena" Content="Seleziona tutta la scena" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource ColoreSecondario}" Foreground="White" Padding="10,8" Margin="0,0,0,15" Click="BtnSelezionaScena_Click" UseLayoutRounding="False"/>
+                            <Button x:Name="btnSelezionaScena" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource ColoreSecondario}" Foreground="White" Padding="10,8" Margin="0,0,0,15" Click="BtnSelezionaScena_Click" UseLayoutRounding="False">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Path Data="{StaticResource IconDataCursor}" Fill="White" Stretch="Uniform" Width="15" Height="15" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{DynamicResource StrSelezionaScena}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
 
                             <StackPanel x:Name="pannelloSelezionePart2" IsEnabled="False">
-                            <TextBlock Text="{DynamicResource StrImgTexture}" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <Path Data="{StaticResource IconDataImage}" Style="{StaticResource SectionHeaderIcon}"/>
+                                <TextBlock Text="{DynamicResource StrImgTexture}" Style="{StaticResource SectionHeaderText}"/>
+                            </StackPanel>
                             <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8">
                                 <StackPanel>
                                     <TextBlock x:Name="txtTexturePath" Text="{DynamicResource StrNessuna}" Foreground="{DynamicResource TestoPrincipale}" TextWrapping="Wrap" Margin="0,0,0,10"/>
@@ -385,7 +388,10 @@
 
                                     <Button x:Name="btnAutoFit" Content="{DynamicResource StrAdattaImg}" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource ColoreSecondario}" Foreground="White" Padding="15,10" Click="BtnAutoFitSkin_Click" UseLayoutRounding="False"/>
 
-                                    <TextBlock Text="Sposta skin (locale)" Foreground="{DynamicResource TestoSecondario}" Margin="0,20,0,5" FontWeight="SemiBold" FontSize="11"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,20,0,5">
+                                        <Path Data="{StaticResource IconDataMove}" Width="13" Height="13" Stretch="Uniform" Fill="{DynamicResource ColorePrimario}" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{DynamicResource StrSpostaSkin}" Style="{StaticResource SectionHeaderText}"/>
+                                    </StackPanel>
 
                                     <TextBlock Text="U" Foreground="{DynamicResource TestoSecondario}" Margin="0,5,0,2" FontSize="10"/>
                                     <Grid Margin="0,0,0,8">
@@ -419,18 +425,22 @@
                                         <Button Grid.Column="4" Content="&gt;&gt;" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="3,5" FontSize="11" Click="BtnOffsetV_BigPlus_Click"/>
                                     </Grid>
 
+                                    <TextBlock Text="{DynamicResource StrAllineamento}" Foreground="{DynamicResource TestoSecondario}" Margin="0,0,0,5" FontWeight="SemiBold" FontSize="11"/>
                                     <Grid Margin="0,0,0,15">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Button x:Name="btnAllineaAlto" Content="Alto" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="5,5" Margin="0,0,3,0" FontSize="11" Click="BtnAllineaAlto_Click"/>
-                                        <Button x:Name="btnAllineaCentro" Grid.Column="1" Content="Centro" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="5,5" Margin="3,0,3,0" FontSize="11" Click="BtnAllineaCentro_Click"/>
-                                        <Button x:Name="btnAllineaBasso" Grid.Column="2" Content="Basso" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="5,5" Margin="3,0,0,0" FontSize="11" Click="BtnAllineaBasso_Click"/>
+                                        <Button x:Name="btnAllineaAlto" Content="{DynamicResource StrAllineaAlto}" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="5,5" Margin="0,0,3,0" FontSize="11" Click="BtnAllineaAlto_Click"/>
+                                        <Button x:Name="btnAllineaCentro" Grid.Column="1" Content="{DynamicResource StrAllineaCentro}" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="5,5" Margin="3,0,3,0" FontSize="11" Click="BtnAllineaCentro_Click"/>
+                                        <Button x:Name="btnAllineaBasso" Grid.Column="2" Content="{DynamicResource StrAllineaBasso}" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="5,5" Margin="3,0,0,0" FontSize="11" Click="BtnAllineaBasso_Click"/>
                                     </Grid>
 
-                                    <TextBlock Text="Origine proiezione (globale 3D)" Foreground="{DynamicResource TestoSecondario}" Margin="0,10,0,5" FontWeight="SemiBold" FontSize="11"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,5">
+                                        <Path Data="{StaticResource IconDataTarget}" Width="13" Height="13" Stretch="Uniform" Fill="{DynamicResource ColorePrimario}" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{DynamicResource StrOrigineProiezione}" Style="{StaticResource SectionHeaderText}"/>
+                                    </StackPanel>
                                     <Grid Margin="0,0,0,10">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="20"/>
@@ -448,7 +458,12 @@
                                         <TextBox x:Name="txtOffsetZ" Text="0.00" Style="{StaticResource ModernInputStyle}" Grid.Column="5" TextChanged="TxtOffsetXYZ_TextChanged"/>
                                     </Grid>
 
-                                    <Button x:Name="btnResetOffset" Content="Reset offset" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="15,8" Click="BtnResetOffsetSkin_Click" UseLayoutRounding="False"/>
+                                    <Button x:Name="btnResetOffset" Style="{StaticResource BaseCardButtonStyle}" Background="{DynamicResource BgPulsante}" Foreground="{DynamicResource TestoPrincipale}" Padding="15,8" Click="BtnResetOffsetSkin_Click" UseLayoutRounding="False">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <Path Data="{StaticResource IconDataReset}" Fill="{DynamicResource TestoPrincipale}" Stretch="Uniform" Width="14" Height="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{DynamicResource StrResetOffset}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
                                 </StackPanel>
                             </Border>
 
@@ -457,7 +472,285 @@
                             <TextBlock x:Name="txtStatus" Margin="0,20" TextWrapping="Wrap" Foreground="{DynamicResource ColoreIngressi}" FontWeight="SemiBold" TextAlignment="Center"/>
                         </StackPanel>
                         </ScrollViewer>
-                    </DockPanel>
+                        </TabItem>
+
+                        <!-- ===== TAB SCENA (luci + sfondo) ===== -->
+                        <TabItem>
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconDataLight}" Width="14" Height="14" Stretch="Uniform" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{DynamicResource StrTabScena}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </TabItem.Header>
+                            <StackPanel Margin="15,12,15,12">
+                                <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8" Margin="0,0,0,10">
+                                    <StackPanel Margin="5">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                                            <Path Data="{StaticResource IconDataLight}" Style="{StaticResource SectionHeaderIcon}"/>
+                                            <TextBlock Text="{DynamicResource StrLuci}" Style="{StaticResource SectionHeaderText}"/>
+                                        </StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="28"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="26"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Grid.Row="0" Grid.Column="1" Text="X" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="11"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="2" Text="Y" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="11"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="3" Text="Z" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="11"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource StrLuce1}" Foreground="{DynamicResource TestoPrincipale}" VerticalAlignment="Center" FontSize="11" Margin="0,2,4,2"/>
+                                            <TextBox x:Name="txtLuce1X" Grid.Row="1" Grid.Column="1" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
+                                            <TextBox x:Name="txtLuce1Y" Grid.Row="1" Grid.Column="2" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
+                                            <TextBox x:Name="txtLuce1Z" Grid.Row="1" Grid.Column="3" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
+                                            <Border x:Name="rectLuce1Colore" Grid.Row="1" Grid.Column="4" Width="20" Height="20" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" HorizontalAlignment="Center" VerticalAlignment="Center" MouseLeftButtonDown="RectLuceColore_Click"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource StrLuce2}" Foreground="{DynamicResource TestoPrincipale}" VerticalAlignment="Center" FontSize="11" Margin="0,2,4,2"/>
+                                            <TextBox x:Name="txtLuce2X" Grid.Row="2" Grid.Column="1" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
+                                            <TextBox x:Name="txtLuce2Y" Grid.Row="2" Grid.Column="2" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
+                                            <TextBox x:Name="txtLuce2Z" Grid.Row="2" Grid.Column="3" Style="{StaticResource ModernInputStyle}" Margin="2,2" TextChanged="TxtLuci_TextChanged"/>
+                                            <Border x:Name="rectLuce2Colore" Grid.Row="2" Grid.Column="4" Width="20" Height="20" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" HorizontalAlignment="Center" VerticalAlignment="Center" MouseLeftButtonDown="RectLuceColore_Click"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="5" Margin="0,0,0,10">
+                                    <StackPanel x:Name="pannelloSfondo" Margin="10">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                                            <Path Data="{StaticResource IconDataPalette}" Style="{StaticResource SectionHeaderIcon}"/>
+                                            <TextBlock Text="{DynamicResource StrSfondoVisual}" Style="{StaticResource SectionHeaderText}"/>
+                                        </StackPanel>
+                                        <Button x:Name="btnSfondoColore" Content="{DynamicResource StrCambiaSfondo}" Margin="0" Style="{StaticResource BaseCardButtonStyle}" Click="BtnSfondoColore_Click" Foreground="{DynamicResource TestoPrincipale}" Background="{DynamicResource BgPulsante}" Padding="10"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </TabItem>
+
+                        <!-- ===== TAB TEAMSTYLE ===== -->
+                        <TabItem>
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconDataStyle}" Width="14" Height="14" Stretch="Uniform" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{DynamicResource StrTabTeam}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </TabItem.Header>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="15,12,15,12">
+
+                                    <TextBlock x:Name="txtTeamVuoto" Text="{DynamicResource StrTeamNessunGioco}" Foreground="{DynamicResource TestoSecondario}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,20" Visibility="Collapsed"/>
+
+                                    <StackPanel x:Name="pannelloTeamCampi">
+
+                                        <!-- Modalità + selettore gioco -->
+                                        <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="10" Margin="0,0,0,12">
+                                            <StackPanel>
+                                                <TextBlock Text="{DynamicResource StrTeamModalita}" Style="{StaticResource SectionHeaderText}" Margin="0,0,0,6"/>
+                                                <Grid Margin="0,0,0,10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <RadioButton x:Name="rbTeamAll" Grid.Column="0" GroupName="TeamMode" Style="{StaticResource TabToggleStyle}" Content="{DynamicResource StrTeamTuttiGiochi}" Margin="0,0,3,0" IsChecked="True" Checked="TeamMode_Changed"/>
+                                                    <RadioButton x:Name="rbTeamPerGame" Grid.Column="1" GroupName="TeamMode" Style="{StaticResource TabToggleStyle}" Content="{DynamicResource StrTeamPerGioco}" Margin="3,0,0,0" Checked="TeamMode_Changed"/>
+                                                </Grid>
+                                                <TextBlock Text="{DynamicResource StrTeamGioco}" Style="{StaticResource SectionHeaderText}" Margin="0,0,0,4"/>
+                                                <ComboBox x:Name="cmbTeamGioco" Background="{DynamicResource BgInput}" Foreground="{DynamicResource TestoPrincipale}" Padding="6,4" IsEnabled="False" SelectionChanged="TeamGioco_Changed"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Griglia / layout -->
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                            <Path Data="{StaticResource IconDataMove}" Width="13" Height="13" Stretch="Uniform" Fill="{DynamicResource ColorePrimario}" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{DynamicResource StrTeamGriglia}" Style="{StaticResource SectionHeaderText}"/>
+                                        </StackPanel>
+                                        <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8" Margin="0,0,0,12">
+                                            <StackPanel>
+                                                <Grid Margin="0,2">
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="70"/></Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{DynamicResource StrTeamEspansione}" Foreground="{DynamicResource TestoPrincipale}" FontSize="11" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                                    <TextBox Grid.Column="1" Tag="vertSpacing" Style="{StaticResource ModernInputStyle}" Margin="4,0,0,0" TextChanged="TeamNum_Changed"/>
+                                                </Grid>
+                                                <Grid Margin="0,2">
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="70"/></Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{DynamicResource StrTeamStripRatio}" Foreground="{DynamicResource TestoPrincipale}" FontSize="11" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                                    <TextBox Grid.Column="1" Tag="actStripYRatio" Style="{StaticResource ModernInputStyle}" Margin="4,0,0,0" TextChanged="TeamNum_Changed"/>
+                                                </Grid>
+                                                <Grid Margin="0,2">
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="70"/></Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{DynamicResource StrTeamDistFrame}" Foreground="{DynamicResource TestoPrincipale}" FontSize="11" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                                    <TextBox Grid.Column="1" Tag="rulFrmDist1_2" Style="{StaticResource ModernInputStyle}" Margin="4,0,0,0" TextChanged="TeamNum_Changed"/>
+                                                </Grid>
+                                                <Grid Margin="0,2">
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="70"/></Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{DynamicResource StrTeamOffsetFrame}" Foreground="{DynamicResource TestoPrincipale}" FontSize="11" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                                    <TextBox Grid.Column="1" Tag="rulFrm1Offs" Style="{StaticResource ModernInputStyle}" Margin="4,0,0,0" TextChanged="TeamNum_Changed"/>
+                                                </Grid>
+                                                <Grid Margin="0,2">
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="70"/></Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{DynamicResource StrTeamMaxNome}" Foreground="{DynamicResource TestoPrincipale}" FontSize="11" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                                    <TextBox Grid.Column="1" Tag="maxSizeNome" Style="{StaticResource ModernInputStyle}" Margin="4,0,0,0" TextChanged="TeamNum_Changed"/>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Posizioni e scale -->
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                            <Path Data="{StaticResource IconDataTarget}" Width="13" Height="13" Stretch="Uniform" Fill="{DynamicResource ColorePrimario}" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{DynamicResource StrTeamPosScale}" Style="{StaticResource SectionHeaderText}"/>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="contTeamVettori">
+                                            <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8" Margin="0,0,0,8">
+                                                <StackPanel>
+                                                    <TextBlock Text="{DynamicResource StrTeamBloccoNome}" Foreground="{DynamicResource TestoPrincipale}" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,4"/>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="X" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="10"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Y" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="10"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="3" Text="Z" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="10"/>
+                                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource StrTeamPos}" Foreground="{DynamicResource TestoSecondario}" FontSize="10" VerticalAlignment="Center"/>
+                                                        <TextBox Grid.Row="1" Grid.Column="1" Tag="posNome.X" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="1" Grid.Column="2" Tag="posNome.Y" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="1" Grid.Column="3" Tag="posNome.Z" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource StrTeamScala}" Foreground="{DynamicResource TestoSecondario}" FontSize="10" VerticalAlignment="Center"/>
+                                                        <TextBox Grid.Row="2" Grid.Column="1" Tag="scalNome.X" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="2" Grid.Column="2" Tag="scalNome.Y" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="2" Grid.Column="3" Tag="scalNome.Z" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8" Margin="0,0,0,8">
+                                                <StackPanel>
+                                                    <TextBlock Text="{DynamicResource StrTeamBloccoHdp}" Foreground="{DynamicResource TestoPrincipale}" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,4"/>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="X" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="10"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Y" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="10"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="3" Text="Z" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="10"/>
+                                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource StrTeamPos}" Foreground="{DynamicResource TestoSecondario}" FontSize="10" VerticalAlignment="Center"/>
+                                                        <TextBox Grid.Row="1" Grid.Column="1" Tag="posHdp.X" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="1" Grid.Column="2" Tag="posHdp.Y" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="1" Grid.Column="3" Tag="posHdp.Z" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource StrTeamScala}" Foreground="{DynamicResource TestoSecondario}" FontSize="10" VerticalAlignment="Center"/>
+                                                        <TextBox Grid.Row="2" Grid.Column="1" Tag="scalHdp.X" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="2" Grid.Column="2" Tag="scalHdp.Y" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="2" Grid.Column="3" Tag="scalHdp.Z" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8" Margin="0,0,0,8">
+                                                <StackPanel>
+                                                    <TextBlock Text="{DynamicResource StrTeamBloccoTot}" Foreground="{DynamicResource TestoPrincipale}" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,4"/>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="X" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="10"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Y" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="10"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="3" Text="Z" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="10"/>
+                                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource StrTeamPos}" Foreground="{DynamicResource TestoSecondario}" FontSize="10" VerticalAlignment="Center"/>
+                                                        <TextBox Grid.Row="1" Grid.Column="1" Tag="posTeamTot.X" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="1" Grid.Column="2" Tag="posTeamTot.Y" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="1" Grid.Column="3" Tag="posTeamTot.Z" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource StrTeamScala}" Foreground="{DynamicResource TestoSecondario}" FontSize="10" VerticalAlignment="Center"/>
+                                                        <TextBox Grid.Row="2" Grid.Column="1" Tag="scalTeamTot.X" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="2" Grid.Column="2" Tag="scalTeamTot.Y" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="2" Grid.Column="3" Tag="scalTeamTot.Z" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8" Margin="0,0,0,12">
+                                                <StackPanel>
+                                                    <TextBlock Text="{DynamicResource StrTeamBloccoCum}" Foreground="{DynamicResource TestoPrincipale}" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,4"/>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="X" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="10"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Y" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="10"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="3" Text="Z" HorizontalAlignment="Center" Foreground="{DynamicResource TestoSecondario}" FontSize="10"/>
+                                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource StrTeamPos}" Foreground="{DynamicResource TestoSecondario}" FontSize="10" VerticalAlignment="Center"/>
+                                                        <TextBox Grid.Row="1" Grid.Column="1" Tag="posCumTeamTot.X" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="1" Grid.Column="2" Tag="posCumTeamTot.Y" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="1" Grid.Column="3" Tag="posCumTeamTot.Z" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource StrTeamScala}" Foreground="{DynamicResource TestoSecondario}" FontSize="10" VerticalAlignment="Center"/>
+                                                        <TextBox Grid.Row="2" Grid.Column="1" Tag="scalCumTeamTot.X" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="2" Grid.Column="2" Tag="scalCumTeamTot.Y" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                        <TextBox Grid.Row="2" Grid.Column="3" Tag="scalCumTeamTot.Z" Style="{StaticResource ModernInputStyle}" Margin="2" TextChanged="TeamNum_Changed"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <!-- Materiale Nome -->
+                                        <StackPanel Orientation="Horizontal" Margin="0,4,0,6">
+                                            <Path Data="{StaticResource IconDataPalette}" Style="{StaticResource SectionHeaderIcon}"/>
+                                            <TextBlock Text="{DynamicResource StrTeamMatNome}" Style="{StaticResource SectionHeaderText}"/>
+                                        </StackPanel>
+                                        <StackPanel x:Name="contTeamMatNome" Margin="0,0,0,12">
+                                            <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8">
+                                                <StackPanel>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="28"/><ColumnDefinition Width="*"/><ColumnDefinition Width="28"/></Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource StrColAmbient}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" VerticalAlignment="Center"/>
+                                                        <Border Grid.Row="0" Grid.Column="1" Tag="nameMaterial.ambientCol" Width="22" Height="22" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" Margin="2" MouseLeftButtonDown="TeamColore_Click"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{DynamicResource StrColDiffuse}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" VerticalAlignment="Center"/>
+                                                        <Border Grid.Row="0" Grid.Column="3" Tag="nameMaterial.diffuseCol" Width="22" Height="22" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" Margin="2" MouseLeftButtonDown="TeamColore_Click"/>
+                                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource StrColEmissive}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" VerticalAlignment="Center"/>
+                                                        <Border Grid.Row="1" Grid.Column="1" Tag="nameMaterial.emissiveCol" Width="22" Height="22" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" Margin="2" MouseLeftButtonDown="TeamColore_Click"/>
+                                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{DynamicResource StrColSpecular}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" VerticalAlignment="Center"/>
+                                                        <Border Grid.Row="1" Grid.Column="3" Tag="nameMaterial.specularCol" Width="22" Height="22" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" Margin="2" MouseLeftButtonDown="TeamColore_Click"/>
+                                                    </Grid>
+                                                    <Grid Margin="0,8,0,0">
+                                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="70"/></Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{DynamicResource StrColGloss}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" VerticalAlignment="Center"/>
+                                                        <TextBox Grid.Column="1" Tag="nameMaterial.glossiness" Style="{StaticResource ModernInputStyle}" TextChanged="TeamNum_Changed"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <!-- Materiale Totali -->
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                            <Path Data="{StaticResource IconDataPalette}" Style="{StaticResource SectionHeaderIcon}"/>
+                                            <TextBlock Text="{DynamicResource StrTeamMatTotali}" Style="{StaticResource SectionHeaderText}"/>
+                                        </StackPanel>
+                                        <StackPanel x:Name="contTeamMatTotali" Margin="0,0,0,12">
+                                            <Border Background="{DynamicResource BgFinestra}" CornerRadius="6" Padding="8">
+                                                <StackPanel>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="28"/><ColumnDefinition Width="*"/><ColumnDefinition Width="28"/></Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource StrColAmbient}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" VerticalAlignment="Center"/>
+                                                        <Border Grid.Row="0" Grid.Column="1" Tag="teamTotsMaterial.ambientCol" Width="22" Height="22" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" Margin="2" MouseLeftButtonDown="TeamColore_Click"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{DynamicResource StrColDiffuse}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" VerticalAlignment="Center"/>
+                                                        <Border Grid.Row="0" Grid.Column="3" Tag="teamTotsMaterial.diffuseCol" Width="22" Height="22" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" Margin="2" MouseLeftButtonDown="TeamColore_Click"/>
+                                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource StrColEmissive}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" VerticalAlignment="Center"/>
+                                                        <Border Grid.Row="1" Grid.Column="1" Tag="teamTotsMaterial.emissiveCol" Width="22" Height="22" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" Margin="2" MouseLeftButtonDown="TeamColore_Click"/>
+                                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{DynamicResource StrColSpecular}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" VerticalAlignment="Center"/>
+                                                        <Border Grid.Row="1" Grid.Column="3" Tag="teamTotsMaterial.specularCol" Width="22" Height="22" CornerRadius="3" BorderBrush="{DynamicResource ColoreBordoCard}" BorderThickness="1" Cursor="Hand" Margin="2" MouseLeftButtonDown="TeamColore_Click"/>
+                                                    </Grid>
+                                                    <Grid Margin="0,8,0,0">
+                                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="70"/></Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{DynamicResource StrColGloss}" Foreground="{DynamicResource TestoSecondario}" FontSize="11" VerticalAlignment="Center"/>
+                                                        <TextBox Grid.Column="1" Tag="teamTotsMaterial.glossiness" Style="{StaticResource ModernInputStyle}" TextChanged="TeamNum_Changed"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                    </TabControl>
                 </Border>
             </Grid>
         </DockPanel>

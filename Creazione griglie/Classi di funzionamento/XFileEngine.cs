@@ -380,13 +380,39 @@ namespace Creazione_griglie
         public static string ApplicaSalvataggio(string testoOriginale, List<MeshData> allMeshesFlat, out string diagnostica)
         {
             string testoModificato = testoOriginale;
-            HashSet<string> elaborati = new HashSet<string>();
             int matSostituiti = 0, matFalliti = 0;
+
+            // Ogni mesh va mappata alla SUA specifica occorrenza del blocco Material nel file.
+            // String.Replace e' globale: con oggetti che partono da un materiale identico
+            // (stesso testo originale) sovrascriveva TUTTE le copie con un unico valore,
+            // ignorando di fatto il flag "Applica a tutti gli oggetti simili". Qui invece
+            // consumo le occorrenze in ordine di documento, una per mesh, e sostituisco solo
+            // quella posizione. Cosi' un materiale modificato tocca solo il proprio oggetto;
+            // i simili non toccati vengono riscritti identici a se stessi (no-op).
+            // tuttiNodiFile arriva da AppiattisciGerarchia, che visita l'albero in ordine:
+            // lo stesso ordine in cui i Material compaiono nel file -> l'accoppiamento e' corretto.
+            var sostituzioni = new List<(int start, int len, string nuovo)>();
+            var prossimaRicerca = new Dictionary<string, int>();
 
             foreach (var mesh in allMeshesFlat)
             {
-                if (string.IsNullOrEmpty(mesh.OriginalMaterialContent) || elaborati.Contains(mesh.OriginalMaterialContent))
+                if (string.IsNullOrEmpty(mesh.OriginalMaterialContent))
                     continue;
+
+                string orig = mesh.OriginalMaterialContent;
+                int from = prossimaRicerca.TryGetValue(orig, out int p) ? p : 0;
+                int pos = testoOriginale.IndexOf(orig, from, StringComparison.Ordinal);
+                if (pos == -1)
+                {
+                    // Non trovata dalla posizione corrente. Se il testo non esiste proprio nel
+                    // file e' un vero fallimento; se invece esiste ma e' gia' stato consumato si
+                    // tratta di un Material condiviso (un unico blocco referenziato da piu' mesh)
+                    // -> normale, lo possiede la prima mesh, le altre lo condividono. Salto.
+                    if (testoOriginale.IndexOf(orig, 0, StringComparison.Ordinal) == -1)
+                        matFalliti++;
+                    continue;
+                }
+                prossimaRicerca[orig] = pos + orig.Length;
 
                 string texBlock = "";
 
@@ -407,16 +433,16 @@ namespace Creazione_griglie
                                     $"  {(mesh.Emissive.R / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.Emissive.G / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};{(mesh.Emissive.B / 255.0).ToString("0.000000", CultureInfo.InvariantCulture)};;\r\n" +
                                     $"{texBlock}";
 
-                if (testoModificato.Contains(mesh.OriginalMaterialContent))
-                {
-                    testoModificato = testoModificato.Replace(mesh.OriginalMaterialContent, newContent);
-                    matSostituiti++;
-                }
-                else
-                {
-                    matFalliti++;
-                }
-                elaborati.Add(mesh.OriginalMaterialContent);
+                sostituzioni.Add((pos, orig.Length, newContent));
+                matSostituiti++;
+            }
+
+            // Applico le sostituzioni dal fondo verso l'inizio: poiche' le posizioni sono
+            // calcolate sul testo originale, partire dalla coda evita di invalidare gli offset
+            // delle sostituzioni precedenti.
+            foreach (var s in sostituzioni.OrderByDescending(s => s.start))
+            {
+                testoModificato = testoModificato.Substring(0, s.start) + s.nuovo + testoModificato.Substring(s.start + s.len);
             }
 
             // Riscrivo i blocchi MeshTextureCoords per persistere la proiezione planare e gli offset locali/zoom.

@@ -15,6 +15,10 @@ namespace Creazione_griglie
         public StartupDialog()
         {
             InitializeComponent();
+
+            // Mostro nel combo la lingua attualmente attiva (preferenza salvata)
+            LinguaSelezionata = App.LinguaCorrente;
+            cmbLingua.SelectedIndex = App.LinguaCorrente == "EN" ? 1 : 0;
         }
 
         // Intercetto il cambio lingua in tempo reale nel pop-up
@@ -22,18 +26,7 @@ namespace Creazione_griglie
         {
             if (cmbLingua == null) return;
             LinguaSelezionata = cmbLingua.SelectedIndex == 0 ? "IT" : "EN";
-            CambiaLinguaDizionario(LinguaSelezionata);
-        }
-
-        // Sostituisco il dizionario risorse a caldo puntando alla cartella 'Lingue'
-        private void CambiaLinguaDizionario(string lingua)
-        {
-            var oldDict = Application.Current.Resources.MergedDictionaries.FirstOrDefault(d => d.Source != null && d.Source.OriginalString.Contains("Stringhe_"));
-            if (oldDict != null) Application.Current.Resources.MergedDictionaries.Remove(oldDict);
-
-            // Inserisco il percorso aggiornato per caricare il dizionario corretto
-            var newDict = new ResourceDictionary { Source = new Uri($"Lingue/Stringhe_{lingua}.xaml", UriKind.Relative) };
-            Application.Current.Resources.MergedDictionaries.Add(newDict);
+            App.ImpostaLingua(LinguaSelezionata);
         }
 
         private void BtnCreaNuovo_Click(object sender, RoutedEventArgs e)

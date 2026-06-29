@@ -16,7 +16,7 @@
     <sys:String x:Key="StrAnnulla">Undo</sys:String>
     <sys:String x:Key="StrRipristina">Reset View</sys:String>
 
-    <sys:String x:Key="StrGerarchia">Elements Hierarchy</sys:String>
+    <sys:String x:Key="StrGerarchia">Element Hierarchy</sys:String>
     <sys:String x:Key="StrComandi">3D Controls</sys:String>
     <sys:String x:Key="StrSeleziona">Select</sys:String>
     <sys:String x:Key="StrRuota">Rotate View</sys:String>
@@ -89,4 +89,42 @@
     <sys:String x:Key="StrLuci">Light Direction</sys:String>
     <sys:String x:Key="StrLuce1">L.1</sys:String>
     <sys:String x:Key="StrLuce2">L.2</sys:String>
+
+    <sys:String x:Key="StrSelezionaScena">Select Entire Scene</sys:String>
+    <sys:String x:Key="StrSpostaSkin">Move Skin (Local)</sys:String>
+    <sys:String x:Key="StrAllineaAlto">Top</sys:String>
+    <sys:String x:Key="StrAllineaCentro">Center</sys:String>
+    <sys:String x:Key="StrAllineaBasso">Bottom</sys:String>
+    <sys:String x:Key="StrOrigineProiezione">Projection Origin (Global 3D)</sys:String>
+    <sys:String x:Key="StrResetOffset">Reset Offset</sys:String>
+    <sys:String x:Key="StrAllineamento">Vertical Alignment</sys:String>
+
+    <sys:String x:Key="StrTabMateriale">Material</sys:String>
+    <sys:String x:Key="StrTabScena">Scene</sys:String>
+    <sys:String x:Key="StrTabTeam">TeamStyle</sys:String>
+    <sys:String x:Key="StrTeamModalita">Edit mode</sys:String>
+    <sys:String x:Key="StrTeamTuttiGiochi">All games</sys:String>
+    <sys:String x:Key="StrTeamPerGioco">Per game</sys:String>
+    <sys:String x:Key="StrTeamGioco">Game type</sys:String>
+    <sys:String x:Key="StrTeamGriglia">Grid / Layout</sys:String>
+    <sys:String x:Key="StrTeamEspansione">Grid expansion</sys:String>
+    <sys:String x:Key="StrTeamStripRatio">Active row ratio</sys:String>
+    <sys:String x:Key="StrTeamDistFrame">Distance between frames 1-2</sys:String>
+    <sys:String x:Key="StrTeamOffsetFrame">First frame position</sys:String>
+    <sys:String x:Key="StrTeamMaxNome">Max name width</sys:String>
+    <sys:String x:Key="StrTeamPosScale">Position &amp; Scale</sys:String>
+    <sys:String x:Key="StrTeamBloccoNome">Player name</sys:String>
+    <sys:String x:Key="StrTeamBloccoHdp">Handicap</sys:String>
+    <sys:String x:Key="StrTeamBloccoTot">Team total</sys:String>
+    <sys:String x:Key="StrTeamBloccoCum">Cumulative total</sys:String>
+    <sys:String x:Key="StrTeamMatNome">Name Material</sys:String>
+    <sys:String x:Key="StrTeamMatTotali">Totals Material</sys:String>
+    <sys:String x:Key="StrColAmbient">Ambient</sys:String>
+    <sys:String x:Key="StrColDiffuse">Diffuse (base)</sys:String>
+    <sys:String x:Key="StrColEmissive">Emissive (glow)</sys:String>
+    <sys:String x:Key="StrColSpecular">Specular (reflection)</sys:String>
+    <sys:String x:Key="StrColGloss">Glossiness</sys:String>
+    <sys:String x:Key="StrTeamNessunGioco">This style has no TeamStyle.xml files to edit.</sys:String>
+    <sys:String x:Key="StrTeamPos">Pos</sys:String>
+    <sys:String x:Key="StrTeamScala">Scale</sys:String>
 </ResourceDictionary>
